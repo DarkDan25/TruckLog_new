@@ -25,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.LightlightGrey
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
@@ -59,7 +61,7 @@ fun LoginPage(navController: NavController) {
                         onValueChange = {value = it},
                         label = { Text("Логин") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -85,7 +87,7 @@ fun LoginPage(navController: NavController) {
                         onValueChange = {value = it},
                         label = { Text("Пароль") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -95,7 +97,7 @@ fun LoginPage(navController: NavController) {
                         )
                     )
                 }
-                Button(onClick = { navController.navigate("s") },
+                Button(onClick = { navController.navigate(t.HomePage.name) },
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
@@ -105,7 +107,7 @@ fun LoginPage(navController: NavController) {
                     Text("Вход",
                         color = Color.Black)
                 }
-                Button(onClick = {navController.navigate("register")},
+                Button(onClick = {navController.navigate(t.Register.name)},
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
@@ -118,4 +120,11 @@ fun LoginPage(navController: NavController) {
             }
         }
     }
+}
+
+@Preview
+
+@Composable
+fun Preview3() {
+    RegistrationPage(navController = rememberNavController())
 }

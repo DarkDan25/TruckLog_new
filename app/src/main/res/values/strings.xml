@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">TruckLog(new)</string>
+    <string name="app_name">TruckLog</string>
+    <string name="profile_page_name">Профиль</string>
+    <string name="settings_page_name">Настройки</string>
 </resources>

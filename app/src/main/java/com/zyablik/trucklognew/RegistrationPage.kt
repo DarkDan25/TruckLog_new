@@ -1,5 +1,6 @@
 package com.zyablik.trucklognew
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.LightlightGrey
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
@@ -60,7 +63,7 @@ fun RegistrationPage(navController: NavController){
                         onValueChange = {value = it},
                         label = { Text("Логин") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -86,7 +89,7 @@ fun RegistrationPage(navController: NavController){
                         onValueChange = {value = it},
                         label = { Text("Почта") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -112,7 +115,7 @@ fun RegistrationPage(navController: NavController){
                         onValueChange = {value = it},
                         label = { Text("Пароль") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -138,7 +141,7 @@ fun RegistrationPage(navController: NavController){
                         onValueChange = {value = it},
                         label = { Text("Повторите пароль") },
                         shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = LightlightGrey),
+                        textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
@@ -149,7 +152,7 @@ fun RegistrationPage(navController: NavController){
                     )
                 }
 
-                Button(onClick = { navController.navigate("s") },
+                Button(onClick = { navController.navigate(t.HomePage.name) },
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
@@ -159,7 +162,7 @@ fun RegistrationPage(navController: NavController){
                     Text("Регистрация",
                         color = Color.Black)
                 }
-                Button(onClick = {navController.navigate("login")},
+                Button(onClick = {navController.navigate(t.Login.name)},
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
@@ -167,9 +170,16 @@ fun RegistrationPage(navController: NavController){
                     )) {
                     Text("Уже есть аккаунт",
                         color = LightlightGrey,
-                        fontSize = 14.sp)
+                        fontSize = 10.sp)
                 }
             }
         }
     }
+}
+
+@Preview
+
+@Composable
+fun Preview2() {
+    RegistrationPage(navController = rememberNavController())
 }
