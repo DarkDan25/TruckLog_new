@@ -97,7 +97,7 @@ fun LoginPage(navController: NavController) {
                         )
                     )
                 }
-                Button(onClick = { navController.navigate(t.HomePage.name) },
+                Button(onClick = { navController.navigate("homepage") },
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
@@ -107,7 +107,7 @@ fun LoginPage(navController: NavController) {
                     Text("Вход",
                         color = Color.Black)
                 }
-                Button(onClick = {navController.navigate(t.Register.name)},
+                Button(onClick = {navController.navigate("registration")},
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(

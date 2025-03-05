@@ -1,5 +1,6 @@
 package com.zyablik.trucklognew
 
+import android.graphics.pdf.models.ListItem
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,7 +84,11 @@ fun SettingsPage(navController: NavController){
                  .height(60.dp)
                  .fillMaxWidth()
                  .padding(0.dp,5.dp)){
-                 Button(onClick = { navController.navigate(t.Login.name) },
+                 Button(onClick = { navController.navigate("login"){
+                     popUpTo("login"){
+                         inclusive = true
+                     }
+                 }},
                      Modifier.align(Alignment.BottomCenter),
                      colors = ButtonDefaults.buttonColors(
                          containerColor = LightCyan
@@ -92,6 +97,8 @@ fun SettingsPage(navController: NavController){
                      Text("Назад",
                          color = Color.Black)
                  }
+                 // To make list of items
+                 //Column { l.forEach {t-> Text(t.toString())} }
              }
 
         }

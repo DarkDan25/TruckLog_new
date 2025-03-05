@@ -28,7 +28,7 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 fun HomePage(navController: NavController){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(Modifier.padding(innerpadding)) {
-            Navigation()
+            //Navigation()
             Column(
                 Modifier.align(Alignment.Center)
             ) {
@@ -50,8 +50,23 @@ fun HomePage(navController: NavController){
                         .fillMaxHeight()
                         .fillMaxWidth()
                 ) {
-                    SettingsPage(navController)
+                    Navigation2(navController)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun Navigation2(navController: NavController){
+    Scaffold(Modifier.fillMaxSize()) { innerpadding ->
+        NavHost(
+            navController = rememberNavController(),
+            startDestination = "settings",
+            modifier = Modifier.padding(innerpadding)
+        ) {
+            composable("settings") {
+                SettingsPage(navController)
             }
         }
     }

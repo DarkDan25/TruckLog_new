@@ -24,11 +24,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-enum class t(){
-    HomePage,
-    Login,
-    Register
-}
+
 
 @Composable
 fun Navigation(){
@@ -36,16 +32,16 @@ fun Navigation(){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         NavHost(
             navController,
-            startDestination = t.Login.name,
+            startDestination = "login",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable(t.Login.name) {
+            composable("login") {
                 LoginPage(navController)
             }
-            composable(t.Register.name) {
+            composable("registration") {
                 RegistrationPage(navController)
             }
-            composable(t.HomePage.name) {
+            composable("homepage") {
                 HomePage(navController)
             }
         }
