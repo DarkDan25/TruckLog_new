@@ -59,14 +59,24 @@ fun HomePage(navController: NavController){
 
 @Composable
 fun Navigation2(navController: NavController){
+    val navController1 = rememberNavController()
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         NavHost(
-            navController = rememberNavController(),
-            startDestination = "settings",
+            navController = navController1,
+            startDestination = "profile",
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("settings") {
-                SettingsPage(navController)
+                SettingsPage(navController1)
+            }
+            composable("profile") {
+                ProfilePage(navController,navController1)
+            }
+            composable("orders") {
+                OrdersPage(navController1)
+            }
+            composable("cars") {
+                CarsPage(navController1)
             }
         }
     }

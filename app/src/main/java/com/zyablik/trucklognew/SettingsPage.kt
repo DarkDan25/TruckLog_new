@@ -84,11 +84,7 @@ fun SettingsPage(navController: NavController){
                  .height(60.dp)
                  .fillMaxWidth()
                  .padding(0.dp,5.dp)){
-                 Button(onClick = { navController.navigate("login"){
-                     popUpTo("login"){
-                         inclusive = true
-                     }
-                 }},
+                 Button(onClick = { navController.navigate("profile") },
                      Modifier.align(Alignment.BottomCenter),
                      colors = ButtonDefaults.buttonColors(
                          containerColor = LightCyan
