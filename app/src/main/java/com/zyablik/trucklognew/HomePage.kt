@@ -63,7 +63,7 @@ fun Navigation2(navController: NavController){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         NavHost(
             navController = navController1,
-            startDestination = "profile",
+            startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("settings") {
@@ -77,6 +77,9 @@ fun Navigation2(navController: NavController){
             }
             composable("cars") {
                 CarsPage(navController1)
+            }
+            composable("home") {
+                MainMenuPage(navController1)
             }
         }
     }

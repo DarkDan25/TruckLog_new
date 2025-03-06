@@ -39,22 +39,32 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
 @Composable
-fun OrdersPage(navController: NavController){
+fun OrdersPage(navController: NavController) {
     var sliderPosition by remember { mutableStateOf(0f) }
     var value by remember { mutableStateOf("") }
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
-        Box(Modifier.padding(innerpadding).fillMaxSize()){
+        Box(
+            Modifier
+                .padding(innerpadding)
+                .fillMaxSize()) {
             Column(
-                Modifier.align(Alignment.TopStart).fillMaxWidth()
-                .padding(0.dp,10.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Box(Modifier.padding(5.dp, 2.dp)
-                    .clip(RoundedCornerShape(45.dp))){
+                Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .padding(0.dp, 10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Box(
+                    Modifier
+                        .padding(5.dp, 2.dp)
+                        .clip(RoundedCornerShape(45.dp))
+                ) {
                     TextField(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .background(MidLightGrey),
                         value = value,
-                        onValueChange = {value = it},
+                        onValueChange = { value = it },
                         label = { Text("Поиск") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -67,23 +77,28 @@ fun OrdersPage(navController: NavController){
                         )
                     )
                 }
-                Box{
+                Box {
 
                 }
             }
             Box(
-                Modifier.align(Alignment.BottomCenter)
-                .height(60.dp)
-                .fillMaxWidth()
-                .padding(0.dp,5.dp)){
-                Button(onClick = { navController.navigate("profile") },
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .height(60.dp)
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp)
+            ) {
+                Button(
+                    onClick = { navController.navigate("home") },
                     Modifier.align(Alignment.BottomCenter),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LightCyan
                     )
                 ) {
-                    Text("Назад",
-                        color = Color.Black)
+                    Text(
+                        "Назад",
+                        color = Color.Black
+                    )
                 }
                 // To make list of items
                 //Column { l.forEach {t-> Text(t.toString())} }

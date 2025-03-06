@@ -80,8 +80,8 @@ fun ProfilePage(navController: NavController, navController1: NavController){
                             .height(60.dp)
                             .fillMaxWidth()
                             .padding(0.dp,5.dp)){
-                            Button(onClick = { navController1.navigate("settings"){
-                                popUpTo("settings"){
+                            Button(onClick = { navController1.navigate("home"){
+                                popUpTo("home"){
                                     inclusive = true
                                 }
                             } },

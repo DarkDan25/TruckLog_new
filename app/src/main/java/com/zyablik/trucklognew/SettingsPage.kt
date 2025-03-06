@@ -84,7 +84,7 @@ fun SettingsPage(navController: NavController){
                  .height(60.dp)
                  .fillMaxWidth()
                  .padding(0.dp,5.dp)){
-                 Button(onClick = { navController.navigate("profile") },
+                 Button(onClick = { navController.navigate("home") },
                      Modifier.align(Alignment.BottomCenter),
                      colors = ButtonDefaults.buttonColors(
                          containerColor = LightCyan
