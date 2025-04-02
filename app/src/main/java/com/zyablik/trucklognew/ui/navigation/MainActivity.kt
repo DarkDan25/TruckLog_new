@@ -1,4 +1,4 @@
-package com.zyablik.trucklognew
+package com.zyablik.trucklognew.ui.navigation
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -14,6 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.ui.screens.HomePage
+import com.zyablik.trucklognew.ui.screens.LoginPage
+import com.zyablik.trucklognew.ui.screens.RegistrationPage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

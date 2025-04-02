@@ -1,23 +1,19 @@
-package com.zyablik.trucklognew
+package com.zyablik.trucklognew.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,6 +38,10 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 fun CarsPage(navController: NavController){
     var sliderPosition by remember { mutableStateOf(0f) }
     var value by remember { mutableStateOf("") }
+    val cars = listOf(
+        Cars("Honda","Civic","Free"),
+        Cars("Nitsubishi","Lancer X","In service")
+    )
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(Modifier.padding(innerpadding).fillMaxSize()){
             Column(
@@ -67,8 +67,23 @@ fun CarsPage(navController: NavController){
                         )
                     )
                 }
-                Box{
-
+                Box {
+                    LazyColumn(
+                        Modifier.padding(10.dp,10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(cars){ car ->
+                            Box(Modifier.background(MidLightGrey)
+                                .fillMaxWidth()
+                                .padding(10.dp,10.dp)){
+                                Column {
+                                    Text(car.name)
+                                    Text(car.model)
+                                    Text(car.status)
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Box(
@@ -92,6 +107,9 @@ fun CarsPage(navController: NavController){
         }
     }
 }
+
+data class Cars(val name:String, val model:String, val status:String)
+
 
 @Preview
 

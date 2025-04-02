@@ -1,23 +1,19 @@
-package com.zyablik.trucklognew
+package com.zyablik.trucklognew.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,6 +38,10 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 fun OrdersPage(navController: NavController) {
     var sliderPosition by remember { mutableStateOf(0f) }
     var value by remember { mutableStateOf("") }
+    val orders = listOf(
+        Order(1,"Done","Heavy","Someone"),
+        Order(1,"Done","Heavy","Someone")
+    )
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
             Modifier
@@ -78,7 +78,23 @@ fun OrdersPage(navController: NavController) {
                     )
                 }
                 Box {
-
+                    LazyColumn(
+                        Modifier.padding(10.dp,10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(orders){ order ->
+                            Box(Modifier.background(MidLightGrey)
+                                .fillMaxWidth()
+                                .padding(10.dp,10.dp)){
+                                Column { 
+                                    Text(order.id.toString())
+                                    Text(order.status)
+                                    Text(order.type)
+                                    Text(order.driver)
+                                }
+                            }
+                        }
+                    }
                 }
             }
             Box(
@@ -107,6 +123,7 @@ fun OrdersPage(navController: NavController) {
         }
     }
 }
+data class Order(val id:Int, val status:String, val type:String, val driver:String)
 
 @Preview
 

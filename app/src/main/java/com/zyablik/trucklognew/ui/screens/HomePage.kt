@@ -1,4 +1,4 @@
-package com.zyablik.trucklognew
+package com.zyablik.trucklognew.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,6 +21,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.ui.navigation.MainMenuPage
+import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 
 
