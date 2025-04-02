@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 data class AnimeQuote(
-    val anime: String,
+    val show: String,
     val character: String,
     val quote: String
 )

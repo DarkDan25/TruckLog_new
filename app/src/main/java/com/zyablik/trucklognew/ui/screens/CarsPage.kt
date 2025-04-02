@@ -1,9 +1,11 @@
 package com.zyablik.trucklognew.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +21,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,13 +35,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.api.AnimeQuote
+import com.zyablik.trucklognew.api.RetrofitClient
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
+import kotlinx.coroutines.launch
 
 @Composable
 fun CarsPage(navController: NavController){
     var sliderPosition by remember { mutableStateOf(0f) }
     var value by remember { mutableStateOf("") }
+    val quotesList = remember { mutableStateListOf<AnimeQuote>() }  // Список для хранения результатов
+    val coroutineScope = rememberCoroutineScope()
     val cars = listOf(
         Cars("Honda","Civic","Free"),
         Cars("Nitsubishi","Lancer X","In service")
@@ -46,7 +55,8 @@ fun CarsPage(navController: NavController){
         Box(Modifier.padding(innerpadding).fillMaxSize()){
             Column(
                 Modifier.align(Alignment.TopStart).fillMaxWidth()
-                    .padding(0.dp,10.dp),
+                    .padding(0.dp,10.dp)
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Box(Modifier.padding(5.dp, 2.dp)
                     .clip(RoundedCornerShape(45.dp))){
@@ -54,7 +64,21 @@ fun CarsPage(navController: NavController){
                         modifier = Modifier.fillMaxWidth()
                             .background(MidLightGrey),
                         value = value,
-                        onValueChange = {value = it},
+                        onValueChange = {
+                            value = it
+                            coroutineScope.launch {
+                                if (it.isNotBlank()) {
+                                    try {
+                                        val newQuotes = RetrofitClient.instance.getQuotesByAnime(it)
+                                        quotesList.clear()  // Очищаем старые данные перед добавлением новых
+                                        quotesList.addAll(newQuotes)  // Добавляем новые цитаты в список
+                                        Log.d("rrr",quotesList.toString())
+                                    } catch (e: Exception) {
+                                        quotesList.clear()  // Если ошибка, очищаем список
+                                    }
+                                }
+                            }
+                                        },
                         label = { Text("Поиск") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -69,22 +93,24 @@ fun CarsPage(navController: NavController){
                 }
                 Box {
                     LazyColumn(
-                        Modifier.padding(10.dp,10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        Modifier.padding(10.dp,10.dp)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        items(cars){ car ->
+                        items(quotesList){ quotes ->
                             Box(Modifier.background(MidLightGrey)
                                 .fillMaxWidth()
                                 .padding(10.dp,10.dp)){
                                 Column {
-                                    Text(car.name)
-                                    Text(car.model)
-                                    Text(car.status)
+                                    Text(quotes.show)
+                                    Text(quotes.character)
+                                    Text(quotes.quote)
                                 }
                             }
                         }
                     }
                 }
+
             }
             Box(
                 Modifier.align(Alignment.BottomCenter)
