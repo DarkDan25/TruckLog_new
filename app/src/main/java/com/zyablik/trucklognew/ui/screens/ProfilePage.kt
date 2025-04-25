@@ -28,73 +28,97 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.WarRed
 
 @Composable
-fun ProfilePage(navController: NavController, navController1: NavController){
+fun ProfilePage(navController: NavController, navController1: NavController) {
+    // Экран профиля пользователя (отличается в зависимости от роли)
     Scaffold { innerpadding ->
-        Box(Modifier.padding(innerpadding)){
+        Box(Modifier.padding(innerpadding)) {
             Column {
-                Box(Modifier.fillMaxWidth()
-                .fillMaxHeight(0.3f)){
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.3f)
+                ) {
                     Image(
                         painter = painterResource(R.drawable.ic_launcher_background),
                         contentDescription = "s",
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-                Box(Modifier.fillMaxSize()){
-                    Column(Modifier.align(Alignment.TopCenter)
-                        .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Фамилия ИО",
-                            fontSize = 30.sp,
-                            textAlign = TextAlign.Center)
-                        Text("ID: <номер>",
-                            fontSize = 30.sp)
-                    }
+                Box(Modifier.fillMaxSize()) {
+                    // Информация о пользователе (кол-во информации будет зависеть от роли пользователя
                     Column(
-                        Modifier.align(Alignment.BottomCenter)
+                        Modifier
+                            .align(Alignment.TopCenter)
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(Modifier
-                            .height(60.dp)
-                            .fillMaxWidth()
-                            .padding(0.dp,5.dp)){
-                            Button(onClick = { navController.navigate("login"){
-                                popUpTo("login"){
-                                    inclusive = true
-                                }
-                            }},
+                        Text(
+                            "Фамилия ИО",
+                            fontSize = 30.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            "ID: <номер>",
+                            fontSize = 30.sp
+                        )
+                    }
+                    Column(
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            Modifier
+                                .height(60.dp)
+                                .fillMaxWidth()
+                                .padding(0.dp, 5.dp)
+                        ) {
+                            // Выход из аккаунта
+                            Button(
+                                onClick = {
+                                    navController.navigate("login") {
+                                        popUpTo("login") {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
                                 Modifier.align(Alignment.BottomCenter),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = WarRed
                                 )
                             ) {
-                                Text("Выйти",
-                                    color = Color.White)
+                                Text(
+                                    "Выйти",
+                                    color = Color.White
+                                )
                             }
-                            // To make list of items
-                            //Column { l.forEach {t-> Text(t.toString())} }
                         }
-                        Box(Modifier
-                            .height(60.dp)
-                            .fillMaxWidth()
-                            .padding(0.dp,5.dp)){
-                            Button(onClick = { navController1.navigate("home"){
-                                popUpTo("home"){
-                                    inclusive = true
-                                }
-                            } },
+                        Box(
+                            Modifier
+                                .height(60.dp)
+                                .fillMaxWidth()
+                                .padding(0.dp, 5.dp)
+                        ) {
+                            // Возврат в главное меню
+                            Button(
+                                onClick = {
+                                    navController1.navigate("home") {
+                                        popUpTo("home") {
+                                            inclusive = true
+                                        }
+                                    }
+                                },
                                 Modifier.align(Alignment.BottomCenter),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = LightCyan
                                 )
                             ) {
-                                Text("Назад",
-                                    color = Color.Black)
+                                Text(
+                                    "Назад",
+                                    color = Color.Black
+                                )
                             }
-                            // To make list of items
-                            //Column { l.forEach {t-> Text(t.toString())} }
                         }
                     }
                 }

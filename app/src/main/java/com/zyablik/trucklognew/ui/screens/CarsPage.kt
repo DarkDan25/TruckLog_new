@@ -51,22 +51,27 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 import kotlinx.coroutines.launch
 
 @Composable
-fun CarsPage(navController: NavController){
+fun CarsPage(navController: NavController) {
     var sliderPosition by remember { mutableStateOf(0f) }
     var value by rememberSaveable { mutableStateOf("") }
+
+    // Лист с цитатами, сообщение об ошибке и корутина (из практики по мобильным приложениям)
     val quotesList = remember { mutableStateListOf<AnimeQuote>() }
     var errorMessage by rememberSaveable() { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
+    // Контроллер клавиатуры (чтобы закрть её) и фокус поля ввода (из практики по мобильным приложениям)
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
+    // Список имеющихся автомобилей
     val cars = listOf(
-        Cars("Honda","Civic","Free"),
-        Cars("Nitsubishi","Lancer X","In service")
+        Cars("Honda", "Civic", "Free"),
+        Cars("Nitsubishi", "Lancer X", "In service")
     )
 
-    fun findQuote(){
+    // Функция поиска цитаты с использованием API
+    fun findQuote() {
         coroutineScope.launch {
             if (value.isNotBlank()) {
                 try {
@@ -86,15 +91,27 @@ fun CarsPage(navController: NavController){
         }
     }
 
+    // Экран с поиском
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
-        Box(Modifier.padding(innerpadding).fillMaxSize()){
+        Box(
+            Modifier
+                .padding(innerpadding)
+                .fillMaxSize()
+        ) {
             Column(
-                Modifier.align(Alignment.TopStart).fillMaxWidth()
-                    .padding(0.dp,10.dp)
+                Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .padding(0.dp, 10.dp)
                     .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Box(Modifier.padding(5.dp, 2.dp)
-                    .clip(RoundedCornerShape(45.dp))){
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Box(
+                    Modifier
+                        .padding(5.dp, 2.dp)
+                        .clip(RoundedCornerShape(45.dp))
+                ) {
+                    // Поле поиска
                     Row(Modifier.fillMaxWidth()) {
                         TextField(
                             modifier = Modifier
@@ -115,50 +132,67 @@ fun CarsPage(navController: NavController){
                                 focusedLabelColor = Color.Black
                             )
                         )
-
+                        // Кнопка очещения поля поиска
                         Button(
-                            onClick = { value = ""
+                            onClick = {
+                                value = ""
                                 focusManager.clearFocus()
                                 keyboardController?.hide()
-                                      },
+                            },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = LightCyan)// Очищаем строку поиска
+                                containerColor = LightCyan
+                            )
                         ) {
                             Text("Очистить", fontSize = 12.sp, color = Color.Black)
                         }
                     }
 
                 }
+
+                // Поле отображения результатов поиска в зависимости от результата поиска
                 Box {
+                    // Ошибка при поиске
                     if (errorMessage != null) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.align(Alignment.Center)
                         ) {
                             Text(errorMessage!!)
-                            Button(onClick = { findQuote() },
+                            Button(
+                                onClick = { findQuote() },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = LightCyan
                                 )
                             ) {
-                                Text("Попробовать снова",
-                                    color = Color.Black)
+                                Text(
+                                    "Попробовать снова",
+                                    color = Color.Black
+                                )
                             }
                         }
+                        // Поле поиска не пустое, но резльтата еще нет
                     } else if (quotesList.isEmpty() && value.isNotBlank()) {
-                        Text("Загрузка...", modifier = Modifier.padding(8.dp)
-                            .align(Alignment.Center))
+                        Text(
+                            "Загрузка...", modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.Center)
+                        )
+                        // Резльтат имеется (для каждого результата делается свой блок)
                     } else {
                         LazyColumn(
-                            Modifier.padding(10.dp,10.dp)
+                            Modifier
+                                .padding(10.dp, 10.dp)
                                 .fillMaxHeight()
                                 .fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            items(quotesList){ quotes ->
-                                Box(Modifier.background(MidLightGrey)
-                                    .fillMaxWidth()
-                                    .padding(10.dp,10.dp)){
+                            items(quotesList) { quotes ->
+                                Box(
+                                    Modifier
+                                        .background(MidLightGrey)
+                                        .fillMaxWidth()
+                                        .padding(10.dp, 10.dp)
+                                ) {
                                     Column {
                                         Text(quotes.show)
                                         Text(quotes.character)
@@ -173,29 +207,33 @@ fun CarsPage(navController: NavController){
 
             }
             Box(
-                Modifier.align(Alignment.BottomCenter)
+                Modifier
+                    .align(Alignment.BottomCenter)
                     .height(60.dp)
                     .fillMaxWidth()
-                    .padding(0.dp,5.dp)){
-                Button(onClick = { navController.navigate("home") },
+                    .padding(0.dp, 5.dp)
+            ) {
+                // Кнопка возврата в главное меню
+                Button(
+                    onClick = { navController.navigate("home") },
                     Modifier.align(Alignment.BottomCenter),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LightCyan
                     )
                 ) {
-                    Text("Назад",
-                        color = Color.Black)
+                    Text(
+                        "Назад",
+                        color = Color.Black
+                    )
                 }
-                // To make list of items
-                //Column { l.forEach {t-> Text(t.toString())} }
             }
 
         }
     }
 }
 
-data class Cars(val name:String, val model:String, val status:String)
-
+// Объект автомобиль
+data class Cars(val name: String, val model: String, val status: String)
 
 
 @Preview

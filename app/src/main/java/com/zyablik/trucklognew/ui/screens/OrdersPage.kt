@@ -36,12 +36,13 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
 @Composable
 fun OrdersPage(navController: NavController) {
-    var sliderPosition by remember { mutableStateOf(0f) }
     var value by remember { mutableStateOf("") }
+    // Список заказов
     val orders = listOf(
         Order(1,"Done","Heavy","Someone"),
         Order(1,"Done","Heavy","Someone")
     )
+    // Окно с заказами
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
             Modifier
@@ -54,6 +55,7 @@ fun OrdersPage(navController: NavController) {
                     .padding(0.dp, 10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                // Поле поиска заказов
                 Box(
                     Modifier
                         .padding(5.dp, 2.dp)
@@ -77,6 +79,7 @@ fun OrdersPage(navController: NavController) {
                         )
                     )
                 }
+                // Отобраэение списка заказов
                 Box {
                     LazyColumn(
                         Modifier.padding(10.dp,10.dp),
@@ -104,6 +107,7 @@ fun OrdersPage(navController: NavController) {
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp)
             ) {
+                // Возврат в главное меню
                 Button(
                     onClick = { navController.navigate("home") },
                     Modifier.align(Alignment.BottomCenter),
@@ -116,8 +120,6 @@ fun OrdersPage(navController: NavController) {
                         color = Color.Black
                     )
                 }
-                // To make list of items
-                //Column { l.forEach {t-> Text(t.toString())} }
             }
 
         }

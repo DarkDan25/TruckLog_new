@@ -21,42 +21,50 @@ import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
 @Composable
-fun MainMenuPage(navController: NavController){
+fun MainMenuPage(navController: NavController) {
+    // Кнопки главного меню
     val listButt = listOf(
-        mainButtons("Профиль","profile"),
-        mainButtons("Заказы","orders"),
-        mainButtons("Транспорт","cars"),
-        mainButtons("Настройки","settings")
+        mainButtons("Профиль", "profile"),
+        mainButtons("Заказы", "orders"),
+        mainButtons("Транспорт", "cars"),
+        mainButtons("Настройки", "settings")
     )
     Scaffold { innerpadding ->
-        Box(Modifier.padding(innerpadding)){
+        Box(Modifier.padding(innerpadding)) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.padding(20.dp)
             ) {
-                items(listButt){ button ->
-                    Box(Modifier.clickable(
-                        onClick = { navController.navigate(button.route){
-                            popUpTo(button.route){
-                                inclusive = true
+                items(listButt) { button ->
+                    Box(Modifier
+                        .clickable(
+                            // Переход в выбранный пункт главного меню
+                            onClick = {
+                                navController.navigate(button.route) {
+                                    popUpTo(button.route) {
+                                        inclusive = true
+                                    }
+                                }
                             }
-                        } }
-                    )
+                        )
                         .background(MidLightGrey)
-                        .size(60.dp,180.dp)
-                    ){
-                        Text(button.name,
-                            Modifier.align(Alignment.BottomCenter))
+                        .size(60.dp, 180.dp)
+                    ) {
+                        Text(
+                            button.name,
+                            Modifier.align(Alignment.BottomCenter)
+                        )
                     }
-
                 }
             }
         }
     }
 }
-data class mainButtons(val name:String, val route:String)
+
+data class mainButtons(val name: String, val route: String)
+
 @Preview
 
 @Composable

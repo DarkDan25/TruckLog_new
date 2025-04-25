@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+// Переключение между экранами регистрации, авторизации и главного меню
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
@@ -39,13 +39,13 @@ fun Navigation(){
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("login") {
-                LoginPage(navController)
+                LoginPage(navController) // Экран авторизации
             }
             composable("registration") {
-                RegistrationPage(navController)
+                RegistrationPage(navController) // Экран регистрации
             }
             composable("homepage") {
-                HomePage(navController)
+                HomePage(navController) // Экран главного меню
             }
         }
     }

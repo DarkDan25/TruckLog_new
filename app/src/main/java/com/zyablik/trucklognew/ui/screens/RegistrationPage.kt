@@ -34,9 +34,14 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.LightlightGrey
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
+// Экран регистрации
 @Composable
 fun RegistrationPage(navController: NavController){
-    var value by remember { mutableStateOf("") }
+    // Значения для полей ввода
+    var login_value by remember { mutableStateOf("") }
+    var email_value by remember { mutableStateOf("") }
+    var password_value by remember { mutableStateOf("") }
+    var reply_password_value by remember { mutableStateOf("") }
     Scaffold(Modifier.fillMaxWidth())
     { innerPadding ->
         Box(
@@ -55,11 +60,12 @@ fun RegistrationPage(navController: NavController){
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
                 ){
+                    // Поле ввода логина
                     TextField(
                         modifier = Modifier.fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = login_value,
+                        onValueChange = {login_value = it},
                         label = { Text("Логин") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -81,11 +87,12 @@ fun RegistrationPage(navController: NavController){
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
                 ){
+                    // Поле ввода почты
                     TextField(
                         modifier = Modifier.fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = email_value,
+                        onValueChange = {email_value = it},
                         label = { Text("Почта") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -107,11 +114,12 @@ fun RegistrationPage(navController: NavController){
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
                 ){
+                    // Поле пароля (символы должы заменяться точками)
                     TextField(
                         modifier = Modifier.fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = password_value,
+                        onValueChange = {password_value = it},
                         label = { Text("Пароль") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -133,11 +141,12 @@ fun RegistrationPage(navController: NavController){
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
                 ){
+                    // Поле повтора пароля (символы должы заменяться точками)
                     TextField(
                         modifier = Modifier.fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = reply_password_value,
+                        onValueChange = {reply_password_value = it},
                         label = { Text("Повторите пароль") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -150,7 +159,7 @@ fun RegistrationPage(navController: NavController){
                         )
                     )
                 }
-
+                // Переход в главное меню
                 Button(onClick = { navController.navigate("homepage") },
                     Modifier
                         .align(Alignment.CenterHorizontally),
@@ -161,6 +170,7 @@ fun RegistrationPage(navController: NavController){
                     Text("Регистрация",
                         color = Color.Black)
                 }
+                // Переход на экран авторизации
                 Button(onClick = {navController.navigate("login")},
                     Modifier
                         .align(Alignment.CenterHorizontally),

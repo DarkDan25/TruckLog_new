@@ -33,32 +33,39 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.LightlightGrey
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
+// Окно регистрации
 @Composable
 fun LoginPage(navController: NavController) {
-    var value by remember { mutableStateOf("") }
+    var login_value by remember { mutableStateOf("") }
+    var password_value by remember { mutableStateOf("") }
     Scaffold(Modifier.fillMaxWidth())
     { innerPadding ->
         Box(
-            Modifier.padding(innerPadding)
-            .fillMaxSize())
+            Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        )
         {
             Column(
-                Modifier.align(Alignment.Center)
-                    .padding(0.dp,10.dp)
+                Modifier
+                    .align(Alignment.Center)
+                    .padding(0.dp, 10.dp)
             ) {
+                // Поле ввода логина пользователя
                 Box(
                     Modifier
                         .width(200.dp)
                         .height(60.dp)
-                        .padding(0.dp,5.dp)
+                        .padding(0.dp, 5.dp)
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
-                ){
+                ) {
                     TextField(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = login_value,
+                        onValueChange = { login_value = it },
                         label = { Text("Логин") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -72,19 +79,21 @@ fun LoginPage(navController: NavController) {
                     )
 
                 }
+                // Поле ввода пароля
                 Box(
                     Modifier
                         .width(200.dp)
                         .height(60.dp)
-                        .padding(0.dp,5.dp)
+                        .padding(0.dp, 5.dp)
                         .clip(RoundedCornerShape(45.dp))
                         .background(MidLightGrey)
-                ){
+                ) {
                     TextField(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = {value = it},
+                        value = password_value,
+                        onValueChange = { password_value = it },
                         label = { Text("Пароль") },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
@@ -97,23 +106,31 @@ fun LoginPage(navController: NavController) {
                         )
                     )
                 }
-                Button(onClick = { navController.navigate("homepage") },
+                // Кнопка переместит пользователя в главное меню если данные правильные
+                Button(
+                    onClick = { navController.navigate("homepage") },
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LightCyan
                     )
                 ) {
-                    Text("Вход",
-                        color = Color.Black)
+                    Text(
+                        "Вход",
+                        color = Color.Black
+                    )
                 }
-                Button(onClick = {navController.navigate("registration")},
+                // Кнопка переместит пользователя на экран регистрации
+                Button(
+                    onClick = { navController.navigate("registration") },
                     Modifier
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MidLightGrey
-                    )) {
-                    Text("Регистрация",
+                    )
+                ) {
+                    Text(
+                        "Регистрация",
                         color = LightlightGrey
                     )
                 }
@@ -126,5 +143,5 @@ fun LoginPage(navController: NavController) {
 
 @Composable
 fun Preview3() {
-    RegistrationPage(navController = rememberNavController())
+    LoginPage(navController = rememberNavController())
 }

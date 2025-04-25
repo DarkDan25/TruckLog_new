@@ -25,15 +25,15 @@ import com.zyablik.trucklognew.ui.navigation.MainMenuPage
 import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 
-
+// Основной экран приложения
 @Composable
 fun HomePage(navController: NavController){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(Modifier.padding(innerpadding)) {
-            //Navigation()
             Column(
                 Modifier.align(Alignment.Center)
             ) {
+                // Заголовок приложения
                 Box(
                     Modifier
                         .fillMaxHeight(0.1f)
@@ -47,6 +47,7 @@ fun HomePage(navController: NavController){
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
+                // Поле меню приложения
                 Box(
                     Modifier.background(Color.Blue)
                         .fillMaxHeight()
@@ -59,6 +60,7 @@ fun HomePage(navController: NavController){
     }
 }
 
+// Интерактивное меню приложения
 @Composable
 fun Navigation2(navController: NavController){
     val navController1 = rememberNavController()

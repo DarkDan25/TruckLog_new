@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
+// Экран настроек (будут дополняться по мере необходимости)
 @Composable
 fun SettingsPage(navController: NavController){
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -40,6 +41,7 @@ fun SettingsPage(navController: NavController){
             Column(Modifier.align(Alignment.TopStart).fillMaxWidth()
                 .padding(0.dp,10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                // Настройка уведомлений
                 Box(){
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
@@ -59,6 +61,7 @@ fun SettingsPage(navController: NavController){
                                 checkedTrackColor = MidLightGrey
                             ))}
                 }
+                // Настройка звука приложения (может не пригодится)
                 Box{
                     Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
@@ -80,6 +83,7 @@ fun SettingsPage(navController: NavController){
                  .height(60.dp)
                  .fillMaxWidth()
                  .padding(0.dp,5.dp)){
+                 // Возврат в главное меню
                  Button(onClick = { navController.navigate("home") },
                      Modifier.align(Alignment.BottomCenter),
                      colors = ButtonDefaults.buttonColors(
@@ -89,8 +93,6 @@ fun SettingsPage(navController: NavController){
                      Text("Назад",
                          color = Color.Black)
                  }
-                 // To make list of items
-                 //Column { l.forEach {t-> Text(t.toString())} }
              }
 
         }
