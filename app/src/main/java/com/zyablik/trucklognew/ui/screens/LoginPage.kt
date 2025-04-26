@@ -33,7 +33,16 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.LightlightGrey
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
-// Окно регистрации
+/**
+ * Экран авторизации пользователя.
+ * login_value - логин пользователя
+ * password_value - пароль пользователя
+ * Данные параметры нужны чтобы проверить, что полбзователь существует в системе.
+ *
+ * Также имеется две кнопки:
+ * Вход - переносит пользователя в главное меню приложения если авторизация успешна
+ * Регистрация - переносит пользователя на экран регистрации чтобы он мог создать аккаунт в системе.
+ */
 @Composable
 fun LoginPage(navController: NavController) {
     var login_value by remember { mutableStateOf("") }

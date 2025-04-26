@@ -25,7 +25,9 @@ import com.zyablik.trucklognew.ui.navigation.MainMenuPage
 import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 
-// Основной экран приложения
+/**
+ * Экран главного меню с заголовком и главным меню
+ */
 @Composable
 fun HomePage(navController: NavController){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
@@ -60,7 +62,14 @@ fun HomePage(navController: NavController){
     }
 }
 
-// Интерактивное меню приложения
+/**
+ * Функция для переключения между экранами и их отображение в меню приложения (MainMenuPage)
+ * settings - настройки
+ * profile - профиль пользователя
+ * orders - заказы
+ * cars - машины агрегатора
+ * home - возврат на домашний экран
+ */
 @Composable
 fun Navigation2(navController: NavController){
     val navController1 = rememberNavController()

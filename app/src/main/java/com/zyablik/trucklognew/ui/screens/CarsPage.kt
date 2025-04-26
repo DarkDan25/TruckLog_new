@@ -50,6 +50,20 @@ import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 import kotlinx.coroutines.launch
 
+/**
+ * Экран со списком машин агрегатора.
+ * value - параметр, который используется поисковой строкой
+ * quotesList - список найденых по запросу цитат (использовалось для практической работы по разработке мобильных приложений)
+ * errorMessage - сообщение при возникновении ошибки
+ * coroutineScope - запуск корутины для работы поиска
+ * keyboardController - управление клавиаутрой, чтобы скрывать её, если требуется
+ * focusManager - фокусировка на объекте (который использует пользователь. В данном случае это поисковая строка
+ * cars - список автомобилей (это будет использовано чутка позже
+ *
+ * Функция findQuote ищет квоты по введеном запросу в поле поиска с использованием API
+ * В Scaffold описан внешний вид страницы
+ * Также в Box, где выводится результат поиска настроено поведение при успешном поиске, ошибке или при выполнении поиска (но результата еще нет)
+ */
 @Composable
 fun CarsPage(navController: NavController) {
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -232,7 +246,12 @@ fun CarsPage(navController: NavController) {
     }
 }
 
-// Объект автомобиль
+/**
+ * Класс автомобиля
+ * name - марка машины
+ * model - модель
+ * status - статус машины (выполняет заказ, свободна, на ТО)
+ */
 data class Cars(val name: String, val model: String, val status: String)
 
 

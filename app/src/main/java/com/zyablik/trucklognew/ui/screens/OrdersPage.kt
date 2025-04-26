@@ -34,6 +34,15 @@ import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
+/**
+ * Окно с заказами
+ *
+ * value - переменная для поисковой стркои (используется для сортировки заказов)
+ * orders - список заказов (в будущем будет хранить либо все заказы, либо те, которые соответствуют запросу поиска)
+ *
+ * В Scaffold описана визуальная часть экрана.
+ * Также имеется Button() с именем Назад, чтобы можно было вернуться в главное меню
+ */
 @Composable
 fun OrdersPage(navController: NavController) {
     var value by remember { mutableStateOf("") }

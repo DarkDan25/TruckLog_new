@@ -32,7 +32,16 @@ import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
-// Экран настроек (будут дополняться по мере необходимости)
+/**
+ * Экран с настройками приложения
+ *
+ * Пока имеется два параметра:
+ *
+ * Уведомелния - будет ли получать пользователь уведомления от приложения
+ * Звук - настройка громкости звуков в приложении (маловероятно что звуки будут)
+ *
+ * Также имеется кнопка Назад для возврата в главное меню
+ */
 @Composable
 fun SettingsPage(navController: NavController){
     var sliderPosition by remember { mutableStateOf(0f) }

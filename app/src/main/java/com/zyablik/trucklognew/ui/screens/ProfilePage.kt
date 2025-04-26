@@ -27,6 +27,12 @@ import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.WarRed
 
+/**
+ * Экран профиля пользователя
+ *
+ * На нем отображается фото профиля, ФИО пользователя, его уникальный номер (ID).
+ * Также имеется кнопка выхода из профиля (Button() с именем Выйти) и кнопка возврата в главное меню (Button() с именем Назад)
+ */
 @Composable
 fun ProfilePage(navController: NavController, navController1: NavController) {
     // Экран профиля пользователя (отличается в зависимости от роли)

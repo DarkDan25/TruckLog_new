@@ -20,6 +20,14 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
 
+/**
+ * Главное меню приложения.
+ * Список listButt хранит в себе кнопки, которые ведут к различным местам приложения:
+ * Профиль пользователя
+ * Заказы
+ * Транспорт
+ * Настройки приложения
+ */
 @Composable
 fun MainMenuPage(navController: NavController) {
     // Кнопки главного меню
@@ -63,6 +71,11 @@ fun MainMenuPage(navController: NavController) {
     }
 }
 
+/**
+ * Класс для собственной кнопки
+ * name - название кнопки
+ * route - путь до нужного экрана (потому что используется Jetpack Compose)
+ */
 data class mainButtons(val name: String, val route: String)
 
 @Preview

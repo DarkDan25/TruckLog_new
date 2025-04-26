@@ -28,7 +28,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Переключение между экранами регистрации, авторизации и главного меню
+/**
+ * Переключение между экранами приложения:
+ * регистрация (registration),
+ * авторизация (login),
+ * главное меню ()homepage).
+ */
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
