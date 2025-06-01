@@ -76,7 +76,7 @@ fun OrdersPage(navController: NavController) {
                             .background(MidLightGrey),
                         value = value,
                         onValueChange = { value = it },
-                        label = { Text("Поиск") },
+                        label = { Text("Поиск", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -84,7 +84,8 @@ fun OrdersPage(navController: NavController) {
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }

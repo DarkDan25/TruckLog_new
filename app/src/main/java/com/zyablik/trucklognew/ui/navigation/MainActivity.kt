@@ -17,13 +17,16 @@ import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.ui.screens.HomePage
 import com.zyablik.trucklognew.ui.screens.LoginPage
 import com.zyablik.trucklognew.ui.screens.RegistrationPage
+import com.zyablik.trucklognew.ui.theme.TruckLognewTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Navigation()
+            TruckLognewTheme {
+                Navigation()
+            }
         }
     }
 }
@@ -35,7 +38,7 @@ class MainActivity : ComponentActivity() {
  * главное меню ()homepage).
  */
 @Composable
-fun Navigation(){
+fun Navigation() {
     val navController = rememberNavController()
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         NavHost(
@@ -60,7 +63,6 @@ fun Navigation(){
     showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
-
 @Composable
 fun Preview() {
     Navigation()

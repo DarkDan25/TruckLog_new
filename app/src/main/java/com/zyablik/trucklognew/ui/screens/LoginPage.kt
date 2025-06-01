@@ -75,7 +75,7 @@ fun LoginPage(navController: NavController) {
                             .background(MidLightGrey),
                         value = login_value,
                         onValueChange = { login_value = it },
-                        label = { Text("Логин") },
+                        label = { Text("Логин", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -83,10 +83,10 @@ fun LoginPage(navController: NavController) {
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
-
                 }
                 // Поле ввода пароля
                 Box(
@@ -103,7 +103,7 @@ fun LoginPage(navController: NavController) {
                             .background(MidLightGrey),
                         value = password_value,
                         onValueChange = { password_value = it },
-                        label = { Text("Пароль") },
+                        label = { Text("Пароль", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -111,7 +111,8 @@ fun LoginPage(navController: NavController) {
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }

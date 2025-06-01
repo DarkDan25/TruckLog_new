@@ -77,7 +77,7 @@ fun RegistrationPage(navController: NavController){
                             .background(MidLightGrey),
                         value = login_value,
                         onValueChange = {login_value = it},
-                        label = { Text("Логин") },
+                        label = { Text("Логин", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -85,7 +85,8 @@ fun RegistrationPage(navController: NavController){
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }
@@ -104,7 +105,7 @@ fun RegistrationPage(navController: NavController){
                             .background(MidLightGrey),
                         value = email_value,
                         onValueChange = {email_value = it},
-                        label = { Text("Почта") },
+                        label = { Text("Почта", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -112,7 +113,8 @@ fun RegistrationPage(navController: NavController){
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }
@@ -131,7 +133,7 @@ fun RegistrationPage(navController: NavController){
                             .background(MidLightGrey),
                         value = password_value,
                         onValueChange = {password_value = it},
-                        label = { Text("Пароль") },
+                        label = { Text("Пароль", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -139,7 +141,8 @@ fun RegistrationPage(navController: NavController){
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }
@@ -158,7 +161,7 @@ fun RegistrationPage(navController: NavController){
                             .background(MidLightGrey),
                         value = reply_password_value,
                         onValueChange = {reply_password_value = it},
-                        label = { Text("Повторите пароль") },
+                        label = { Text("Повторите пароль", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
@@ -166,7 +169,8 @@ fun RegistrationPage(navController: NavController){
                             unfocusedContainerColor = MidLightGrey,
                             focusedIndicatorColor = MidLightGrey,
                             unfocusedIndicatorColor = MidLightGrey,
-                            focusedLabelColor = Color.Black
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Black
                         )
                     )
                 }
