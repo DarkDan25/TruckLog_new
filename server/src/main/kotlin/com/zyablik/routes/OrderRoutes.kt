@@ -25,7 +25,7 @@ fun Route.orderRoutes() {
     authenticate {
         post("/orders") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class)
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
             if (userId == null) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -50,12 +50,12 @@ fun Route.orderRoutes() {
 
         get("/orders") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class)
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
             if (userId == null) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val role = principal.getClaim("role", String::class) ?: ""
+            val role = principal.payload.getClaim("role").asString() ?: ""
 
             val orders = dbQuery {
                 val query = if (role == "customer") {
@@ -84,7 +84,7 @@ fun Route.orderRoutes() {
 
         post("/orders/{id}/accept") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class)
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
             if (userId == null) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -102,8 +102,8 @@ fun Route.orderRoutes() {
                 if (order[Orders.status] != OrderStatus.PENDING) return@dbQuery HttpStatusCode.Conflict
                 
                 Orders.update({ Orders.id eq orderId }) {
-                    it[Orders.status] = OrderStatus.ACCEPTED
-                    it[Orders.driverId] = EntityID(userId, Users)
+                    it[status] = OrderStatus.ACCEPTED
+                    it[driverId] = EntityID(userId, Users)
                 }
                 HttpStatusCode.OK
             }
@@ -112,7 +112,7 @@ fun Route.orderRoutes() {
 
         post("/orders/{id}/status") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class)
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
             if (userId == null) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
@@ -134,7 +134,7 @@ fun Route.orderRoutes() {
                 if (order[Orders.driverId]?.value != userId) return@dbQuery HttpStatusCode.Forbidden
                 
                 Orders.update({ Orders.id eq orderId }) {
-                    it[Orders.status] = newStatus
+                    it[status] = newStatus
                 }
                 HttpStatusCode.OK
             }
@@ -142,39 +142,62 @@ fun Route.orderRoutes() {
         }
 
         post("/orders/{id}/cancel") {
-            val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class)
-            if (userId == null) {
-                call.respond(HttpStatusCode.Unauthorized)
-                return@post
-            }
-            val role = principal.getClaim("role", String::class)
-            
-            val orderId = call.parameters["id"]?.toIntOrNull()
-            if (orderId == null) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-
-            val result = dbQuery {
-                val order = Orders.select { Orders.id eq orderId }.singleOrNull()
-                if (order == null) return@dbQuery HttpStatusCode.NotFound
+            try {
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.payload?.getClaim("userId")?.asInt()
+                if (userId == null) {
+                    call.respond(HttpStatusCode.Unauthorized)
+                    return@post
+                }
+                val role = principal.payload.getClaim("role").asString()
                 
-                val currentStatus = order[Orders.status]
-                if (currentStatus == OrderStatus.DELIVERED || currentStatus == OrderStatus.CANCELLED_BY_CUSTOMER || currentStatus == OrderStatus.CANCELLED_BY_DRIVER) {
-                    return@dbQuery HttpStatusCode.Conflict
+                val orderId = call.parameters["id"]?.toIntOrNull()
+                if (orderId == null) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@post
                 }
 
-                // Проверяем, что клиент отменяет свой заказ, или водитель свой принятый
-                if (role == "customer" && order[Orders.customerId].value != userId) return@dbQuery HttpStatusCode.Forbidden
-                if (role == "driver" && order[Orders.driverId]?.value != userId) return@dbQuery HttpStatusCode.Forbidden
+                val result = dbQuery {
+                    val order = Orders.select { Orders.id eq orderId }.singleOrNull()
+                    if (order == null) return@dbQuery HttpStatusCode.NotFound
+                    
+                    val currentStatus = order[Orders.status]
+                    if (currentStatus == OrderStatus.DELIVERED || currentStatus == OrderStatus.CANCELLED_BY_CUSTOMER || currentStatus == OrderStatus.CANCELLED_BY_DRIVER) {
+                        return@dbQuery HttpStatusCode.Conflict
+                    }
 
-                Orders.update({ Orders.id eq orderId }) {
-                    it[Orders.status] = if (role == "customer") OrderStatus.CANCELLED_BY_CUSTOMER else OrderStatus.CANCELLED_BY_DRIVER
+                    // Логируем для отладки
+                    println("DEBUG: role=$role, userId=$userId, orderCustomerId=${order[Orders.customerId].value}, orderDriverId=${order[Orders.driverId]?.value}")
+
+                    if (role.equals("customer", ignoreCase = true)) {
+                        if (order[Orders.customerId].value != userId) {
+                            println("DEBUG: Forbidden - customerId mismatch")
+                            return@dbQuery HttpStatusCode.Forbidden
+                        }
+                    } else if (role.equals("driver", ignoreCase = true)) {
+                        if (order[Orders.driverId]?.value != userId) {
+                            println("DEBUG: Forbidden - driverId mismatch")
+                            return@dbQuery HttpStatusCode.Forbidden
+                        }
+                    }
+
+                    Orders.update({ Orders.id eq orderId }) {
+                        it[status] = if (role.equals("customer", ignoreCase = true)) OrderStatus.CANCELLED_BY_CUSTOMER else OrderStatus.CANCELLED_BY_DRIVER
+                    }
+                    HttpStatusCode.OK
                 }
-                HttpStatusCode.OK
+                call.respond(result)
+            } catch (e: Exception) {
+                // Логируем ошибку для отладки
+                println("CANCEL ERROR: ${e.message}")
+                e.printStackTrace()
+                
+                // Если ошибка произошла внутри respond, это может быть критично.
+                // Но скорее всего ошибка в логике выше.
+                if (!call.response.isCommitted) {
+                    call.respond(HttpStatusCode.InternalServerError, e.message ?: "Unknown error")
+                }
             }
-            call.respond(result)
         }
     }
 }

@@ -36,7 +36,7 @@ object Orders : IntIdTable("orders") {
     val destination = varchar("destination", 255)
     val deliveryDate = datetime("delivery_date")
     val comment = text("comment").nullable()
-    val status = enumerationByName("status", 20, OrderStatus::class).default(OrderStatus.PENDING)
+    val status = enumerationByName("status", 50, OrderStatus::class).default(OrderStatus.PENDING)
     val customerId = reference("customer_id", Users, onDelete = ReferenceOption.CASCADE)
     val driverId = reference("driver_id", Users, onDelete = ReferenceOption.SET_NULL).nullable()
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)

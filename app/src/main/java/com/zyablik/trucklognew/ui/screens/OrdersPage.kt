@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun OrdersPage(navController: NavController) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var appliedSearchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchFocused by remember { mutableStateOf(false) }
     var searchHistoryList by remember { mutableStateOf<List<String>>(emptyList()) }
     var orders by remember { mutableStateOf<List<OrderResponse>>(emptyList()) }
@@ -93,8 +94,8 @@ fun OrdersPage(navController: NavController) {
         s != "DELIVERED" && s != "CANCELLED_BY_CUSTOMER" && s != "CANCELLED_BY_DRIVER"
     }
 
-    val filteredOrders = if (searchQuery.isBlank()) activeOrders else activeOrders.filter {
-        it.id.toString().contains(searchQuery, ignoreCase = true)
+    val filteredOrders = if (appliedSearchQuery.isBlank()) activeOrders else activeOrders.filter {
+        it.id.toString().contains(appliedSearchQuery, ignoreCase = true)
     }
 
     // Список статусов для прокрутки (для водителя)
@@ -148,7 +149,8 @@ fun OrdersPage(navController: NavController) {
                             // Кнопка поиска
                             Button(
                                 onClick = {
-                                    val cleanedQuery = searchQuery.trim()
+                                    val cleanedQuery = searchQuery.trim().replace("\"", "").replace("'", "")
+                                    appliedSearchQuery = cleanedQuery
                                     if (cleanedQuery.isNotBlank()) {
                                         coroutineScope.launch {
                                             try {
@@ -175,6 +177,7 @@ fun OrdersPage(navController: NavController) {
                             Button(
                                 onClick = {
                                     searchQuery = ""
+                                    appliedSearchQuery = ""
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
                                 },
@@ -209,6 +212,7 @@ fun OrdersPage(navController: NavController) {
                                                     .fillMaxWidth()
                                                     .clickable {
                                                         searchQuery = query
+                                                        appliedSearchQuery = query
                                                         focusManager.clearFocus()
                                                     }
                                                     .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -317,8 +321,17 @@ fun OrdersPage(navController: NavController) {
                                             }
                                         }
 
-                                        // Кнопка "Отменить заказ" (для всех, если не доставлен и не отменен)
-                                        if (!order.status.equals("Delivered", ignoreCase = true) && !order.status.equals("Cancelled", ignoreCase = true)) {
+                                        // Кнопка "Отменить заказ"
+                                        // Клиент может отменить любой свой активный заказ
+                                        // Водитель может отменить ТОЛЬКО ПРИНЯТЫЙ им заказ (не свободный)
+                                        val canCancel = if (userRole == "customer") {
+                                            true // Клиент видит только свои заказы, поэтому может отменить любой активный
+                                        } else {
+                                            // Водитель может отменить только если он уже принял заказ (статус не Pending)
+                                            !order.status.equals("Pending", ignoreCase = true)
+                                        }
+
+                                        if (canCancel && !order.status.equals("Delivered", ignoreCase = true) && !order.status.equals("Cancelled", ignoreCase = true)) {
                                             Button(
                                                 onClick = {
                                                     coroutineScope.launch {

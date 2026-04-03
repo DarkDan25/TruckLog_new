@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HistoryPage(navController: NavController) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var appliedSearchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchFocused by remember { mutableStateOf(false) }
     var searchHistoryList by remember { mutableStateOf<List<String>>(emptyList()) }
     var orders by remember { mutableStateOf<List<com.zyablik.trucklognew.api.OrderResponse>>(emptyList()) }
@@ -82,8 +83,8 @@ fun HistoryPage(navController: NavController) {
         s == "DELIVERED" || s == "CANCELLED_BY_CUSTOMER" || s == "CANCELLED_BY_DRIVER"
     }
 
-    val filteredOrders = if (searchQuery.isBlank()) finishedOrders else finishedOrders.filter {
-        it.id.toString().contains(searchQuery, ignoreCase = true)
+    val filteredOrders = if (appliedSearchQuery.isBlank()) finishedOrders else finishedOrders.filter {
+        it.id.toString().contains(appliedSearchQuery, ignoreCase = true)
     }
 
     // Экран с историей
@@ -137,7 +138,8 @@ fun HistoryPage(navController: NavController) {
                             // Кнопка поиска
                             Button(
                                 onClick = {
-                                    val cleanedQuery = searchQuery.trim()
+                                    val cleanedQuery = searchQuery.trim().replace("\"", "").replace("'", "")
+                                    appliedSearchQuery = cleanedQuery
                                     if (cleanedQuery.isNotBlank()) {
                                         coroutineScope.launch {
                                             try {
@@ -164,6 +166,7 @@ fun HistoryPage(navController: NavController) {
                             Button(
                                 onClick = {
                                     searchQuery = ""
+                                    appliedSearchQuery = ""
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
                                 },
@@ -198,6 +201,7 @@ fun HistoryPage(navController: NavController) {
                                                     .fillMaxWidth()
                                                     .clickable {
                                                         searchQuery = query
+                                                        appliedSearchQuery = query
                                                         focusManager.clearFocus()
                                                     }
                                                     .padding(horizontal = 16.dp, vertical = 8.dp),
