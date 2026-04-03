@@ -2,17 +2,24 @@ package com.zyablik.trucklognew.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,12 +38,17 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun OrdersPage(navController: NavController) {
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchFocused by remember { mutableStateOf(false) }
+    var searchHistoryList by remember { mutableStateOf<List<String>>(emptyList()) }
     var orders by remember { mutableStateOf<List<OrderResponse>>(emptyList()) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val sessionManager = remember { SessionManager(context) }
     var isLoading by remember { mutableStateOf(false) }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     val token = sessionManager.getAuthToken() ?: ""
     val userRole = sessionManager.getUserRole() ?: ""
@@ -62,17 +74,31 @@ fun OrdersPage(navController: NavController) {
         }
     }
 
-    // Загрузка заказов при открытии экрана
+    // Загрузка истории поиска и заказов при открытии экрана
     LaunchedEffect(Unit) {
         refreshOrders()
+        if (token.isNotEmpty()) {
+            try {
+                val response = RetrofitClient.instance.getSearchHistory("Bearer $token")
+                if (response.isSuccessful) {
+                    searchHistoryList = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {}
+        }
     }
 
-    val filteredOrders = if (searchQuery.isBlank()) orders else orders.filter {
-        it.type.contains(searchQuery, ignoreCase = true) || it.destination.contains(searchQuery, ignoreCase = true)
+    // Фильтрация активных заказов
+    val activeOrders = orders.filter { order ->
+        val s = order.status.uppercase()
+        s != "DELIVERED" && s != "CANCELLED_BY_CUSTOMER" && s != "CANCELLED_BY_DRIVER"
+    }
+
+    val filteredOrders = if (searchQuery.isBlank()) activeOrders else activeOrders.filter {
+        it.id.toString().contains(searchQuery, ignoreCase = true)
     }
 
     // Список статусов для прокрутки (для водителя)
-    val statusCycle = listOf("Accepted", "In Transit", "Delivered")
+    val statusCycle = listOf("ACCEPTED", "LOADING", "IN_TRANSIT", "DELIVERED")
 
     // Окно с заказами
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
@@ -87,30 +113,115 @@ fun OrdersPage(navController: NavController) {
                     .padding(0.dp, 10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                // Поле поиска заказов
+                // Поле поиска заказов (аналогично HistoryPage)
                 Box(
                     Modifier
                         .padding(5.dp, 2.dp)
-                        .clip(RoundedCornerShape(45.dp))
                 ) {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MidLightGrey),
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        label = { Text("Поиск по типу или месту", color = Color.Black) },
-                        shape = RoundedCornerShape(45.dp),
-                        textStyle = TextStyle(color = Color.Black),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MidLightGrey,
-                            unfocusedContainerColor = MidLightGrey,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedLabelColor = Color.Black,
-                            unfocusedLabelColor = Color.Black
-                        )
-                    )
+                    Column {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextField(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(45.dp))
+                                    .background(MidLightGrey)
+                                    .onFocusChanged { focusState ->
+                                        isSearchFocused = focusState.isFocused
+                                    },
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                label = { Text("Поиск по ID", color = Color.Black) },
+                                shape = RoundedCornerShape(45.dp),
+                                textStyle = TextStyle(color = Color.Black),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MidLightGrey,
+                                    unfocusedContainerColor = MidLightGrey,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    focusedLabelColor = Color.Black,
+                                    unfocusedLabelColor = Color.Black
+                                )
+                            )
+                            // Кнопка поиска
+                            Button(
+                                onClick = {
+                                    val cleanedQuery = searchQuery.trim()
+                                    if (cleanedQuery.isNotBlank()) {
+                                        coroutineScope.launch {
+                                            try {
+                                                RetrofitClient.instance.saveSearchQuery("Bearer $token", cleanedQuery)
+                                                val response = RetrofitClient.instance.getSearchHistory("Bearer $token")
+                                                if (response.isSuccessful) {
+                                                    searchHistoryList = response.body() ?: emptyList()
+                                                }
+                                            } catch (e: Exception) {}
+                                        }
+                                    }
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = LightCyan),
+                                modifier = Modifier
+                                    .height(56.dp)
+                                    .clip(RoundedCornerShape(45.dp)),
+                                shape = RoundedCornerShape(45.dp)
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                            // Кнопка очищения
+                            Button(
+                                onClick = {
+                                    searchQuery = ""
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = LightCyan),
+                                modifier = Modifier
+                                    .height(56.dp)
+                                    .clip(RoundedCornerShape(45.dp)),
+                                shape = RoundedCornerShape(45.dp)
+                            ) {
+                                Text("Очистить", fontSize = 12.sp, color = Color.Black)
+                            }
+                        }
+
+                        // История поиска
+                        if (isSearchFocused && searchHistoryList.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(MidLightGrey)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(vertical = 8.dp)
+                                        .heightIn(max = 200.dp)
+                                ) {
+                                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                        items(searchHistoryList) { query ->
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        searchQuery = query
+                                                        focusManager.clearFocus()
+                                                    }
+                                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(query, color = Color.Black)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (isLoading) {
@@ -154,11 +265,18 @@ fun OrdersPage(navController: NavController) {
                                                         try {
                                                             val resp = RetrofitClient.instance.acceptOrder("Bearer $token", order.id)
                                                             if (resp.isSuccessful) {
-                                                                refreshOrders()
-                                                            }
-                                                        } catch (e: Exception) {}
-                                                    }
-                                                },
+                                                                // Мгновенное обновление локального списка для лучшего UX
+                                                                 orders = orders.map { if (it.id == order.id) it.copy(status = "Accepted") else it }
+                                                                 Toast.makeText(context, "Заказ принят", Toast.LENGTH_SHORT).show()
+                                                                 refreshOrders()
+                                                             } else {
+                                                                 Toast.makeText(context, "Ошибка принятия: ${resp.code()}", Toast.LENGTH_SHORT).show()
+                                                             }
+                                                         } catch (e: Exception) {
+                                                             Toast.makeText(context, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                         }
+                                                     }
+                                                 },
                                                 modifier = Modifier.height(36.dp),
                                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                                 colors = ButtonDefaults.buttonColors(containerColor = LightCyan)
@@ -179,11 +297,18 @@ fun OrdersPage(navController: NavController) {
                                                         try {
                                                             val resp = RetrofitClient.instance.updateOrderStatus("Bearer $token", order.id, nextStatus)
                                                             if (resp.isSuccessful) {
-                                                                refreshOrders()
-                                                            }
-                                                        } catch (e: Exception) {}
-                                                    }
-                                                },
+                                                                // Мгновенное обновление локального списка
+                                                                 orders = orders.map { if (it.id == order.id) it.copy(status = nextStatus) else it }
+                                                                 Toast.makeText(context, "Статус обновлен", Toast.LENGTH_SHORT).show()
+                                                                 refreshOrders()
+                                                             } else {
+                                                                 Toast.makeText(context, "Ошибка статуса: ${resp.code()}", Toast.LENGTH_SHORT).show()
+                                                             }
+                                                         } catch (e: Exception) {
+                                                             Toast.makeText(context, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                         }
+                                                     }
+                                                 },
                                                 modifier = Modifier.height(36.dp),
                                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                                 colors = ButtonDefaults.buttonColors(containerColor = LightCyan)
@@ -200,11 +325,18 @@ fun OrdersPage(navController: NavController) {
                                                         try {
                                                             val resp = RetrofitClient.instance.cancelOrder("Bearer $token", order.id)
                                                             if (resp.isSuccessful) {
-                                                                refreshOrders()
-                                                            }
-                                                        } catch (e: Exception) {}
-                                                    }
-                                                },
+                                                                // Мгновенное обновление локального списка
+                                                                 orders = orders.map { if (it.id == order.id) it.copy(status = "Cancelled") else it }
+                                                                 Toast.makeText(context, "Заказ отменен", Toast.LENGTH_SHORT).show()
+                                                                 refreshOrders()
+                                                             } else {
+                                                                 Toast.makeText(context, "Ошибка отмены: ${resp.code()}", Toast.LENGTH_SHORT).show()
+                                                             }
+                                                         } catch (e: Exception) {
+                                                             Toast.makeText(context, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                         }
+                                                     }
+                                                 },
                                                 modifier = Modifier.height(36.dp),
                                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.7f))

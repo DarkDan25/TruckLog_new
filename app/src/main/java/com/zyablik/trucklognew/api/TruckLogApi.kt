@@ -38,7 +38,7 @@ interface TruckLogApiService {
     suspend fun login(@Body request: AuthRequest): Response<AuthResponse>
 
     @POST("orders")
-    suspend fun createOrder(@Header("Authorization") token: String, @Body request: OrderRequest): Response<String>
+    suspend fun createOrder(@Header("Authorization") token: String, @Body request: OrderRequest): Response<Unit>
 
     @GET("orders")
     suspend fun getOrders(@Header("Authorization") token: String): Response<List<OrderResponse>>

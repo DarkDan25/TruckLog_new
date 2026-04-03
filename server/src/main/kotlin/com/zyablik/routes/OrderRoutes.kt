@@ -18,13 +18,18 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 
 fun Route.orderRoutes() {
     authenticate {
         post("/orders") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            val userId = principal?.getClaim("userId", Int::class)
+            if (userId == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
             
             val request = call.receive<OrderRequest>()
             
@@ -40,13 +45,17 @@ fun Route.orderRoutes() {
                 }.value
             }
             
-            call.respond(HttpStatusCode.Created, "Заказ #$orderId создан")
+            call.respond(HttpStatusCode.Created, mapOf("id" to orderId, "message" to "Заказ #$orderId создан"))
         }
 
         get("/orders") {
             val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", Int::class) ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val role = principal.getClaim("role", String::class)
+            val userId = principal?.getClaim("userId", Int::class)
+            if (userId == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val role = principal.getClaim("role", String::class) ?: ""
 
             val orders = dbQuery {
                 val query = if (role == "customer") {
@@ -71,6 +80,101 @@ fun Route.orderRoutes() {
                 }
             }
             call.respond(orders)
+        }
+
+        post("/orders/{id}/accept") {
+            val principal = call.principal<JWTPrincipal>()
+            val userId = principal?.getClaim("userId", Int::class)
+            if (userId == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            
+            val orderId = call.parameters["id"]?.toIntOrNull()
+            if (orderId == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+
+            val result = dbQuery {
+                val order = Orders.select { Orders.id eq orderId }.singleOrNull()
+                if (order == null) return@dbQuery HttpStatusCode.NotFound
+                if (order[Orders.status] != OrderStatus.PENDING) return@dbQuery HttpStatusCode.Conflict
+                
+                Orders.update({ Orders.id eq orderId }) {
+                    it[Orders.status] = OrderStatus.ACCEPTED
+                    it[Orders.driverId] = EntityID(userId, Users)
+                }
+                HttpStatusCode.OK
+            }
+            call.respond(result)
+        }
+
+        post("/orders/{id}/status") {
+            val principal = call.principal<JWTPrincipal>()
+            val userId = principal?.getClaim("userId", Int::class)
+            if (userId == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            
+            val orderId = call.parameters["id"]?.toIntOrNull()
+            if (orderId == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            
+            val newStatusStr = call.request.queryParameters["status"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+            
+            val newStatus = try { OrderStatus.valueOf(newStatusStr.uppercase()) } catch (e: Exception) { return@post call.respond(HttpStatusCode.BadRequest) }
+
+            val result = dbQuery {
+                val order = Orders.select { Orders.id eq orderId }.singleOrNull()
+                if (order == null) return@dbQuery HttpStatusCode.NotFound
+                if (order[Orders.driverId]?.value != userId) return@dbQuery HttpStatusCode.Forbidden
+                
+                Orders.update({ Orders.id eq orderId }) {
+                    it[Orders.status] = newStatus
+                }
+                HttpStatusCode.OK
+            }
+            call.respond(result)
+        }
+
+        post("/orders/{id}/cancel") {
+            val principal = call.principal<JWTPrincipal>()
+            val userId = principal?.getClaim("userId", Int::class)
+            if (userId == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            val role = principal.getClaim("role", String::class)
+            
+            val orderId = call.parameters["id"]?.toIntOrNull()
+            if (orderId == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+
+            val result = dbQuery {
+                val order = Orders.select { Orders.id eq orderId }.singleOrNull()
+                if (order == null) return@dbQuery HttpStatusCode.NotFound
+                
+                val currentStatus = order[Orders.status]
+                if (currentStatus == OrderStatus.DELIVERED || currentStatus == OrderStatus.CANCELLED_BY_CUSTOMER || currentStatus == OrderStatus.CANCELLED_BY_DRIVER) {
+                    return@dbQuery HttpStatusCode.Conflict
+                }
+
+                // Проверяем, что клиент отменяет свой заказ, или водитель свой принятый
+                if (role == "customer" && order[Orders.customerId].value != userId) return@dbQuery HttpStatusCode.Forbidden
+                if (role == "driver" && order[Orders.driverId]?.value != userId) return@dbQuery HttpStatusCode.Forbidden
+
+                Orders.update({ Orders.id eq orderId }) {
+                    it[Orders.status] = if (role == "customer") OrderStatus.CANCELLED_BY_CUSTOMER else OrderStatus.CANCELLED_BY_DRIVER
+                }
+                HttpStatusCode.OK
+            }
+            call.respond(result)
         }
     }
 }
