@@ -19,6 +19,9 @@ import com.zyablik.trucklognew.ui.screens.LoginPage
 import com.zyablik.trucklognew.ui.screens.RegistrationPage
 import com.zyablik.trucklognew.ui.theme.TruckLognewTheme
 
+import androidx.compose.ui.platform.LocalContext
+import com.zyablik.trucklognew.utils.SessionManager
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,28 +35,29 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Переключение между экранами приложения:
- * регистрация (registration),
- * авторизация (login),
- * главное меню ()homepage).
+ * Переключение между экранами приложения.
  */
 @Composable
 fun Navigation() {
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val startDest = if (sessionManager.getAuthToken() != null) "homepage" else "login"
+    
     val navController = rememberNavController()
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         NavHost(
             navController,
-            startDestination = "login",
+            startDestination = startDest,
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("login") {
-                LoginPage(navController) // Экран авторизации
+                LoginPage(navController)
             }
             composable("registration") {
-                RegistrationPage(navController) // Экран регистрации
+                RegistrationPage(navController)
             }
             composable("homepage") {
-                HomePage(navController) // Экран главного меню
+                HomePage(navController)
             }
         }
     }

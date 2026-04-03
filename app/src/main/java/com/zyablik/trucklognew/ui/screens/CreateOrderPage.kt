@@ -1,31 +1,18 @@
 package com.zyablik.trucklognew.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,8 +20,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.api.OrderRequest
+import com.zyablik.trucklognew.api.RetrofitClient
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
+import com.zyablik.trucklognew.utils.SessionManager
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Экран создания нового заказа.
@@ -44,8 +37,15 @@ fun CreateOrderPage(navController: NavController) {
     var orderType by remember { mutableStateOf("") }
     var orderWeight by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
-    var deliveryDate by remember { mutableStateOf("") }
+    var deliveryDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)) }
     var comments by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val sessionManager = remember { SessionManager(context) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    val token = sessionManager.getAuthToken() ?: ""
 
     Scaffold(Modifier.fillMaxSize()) { innerPadding ->
         Box(
@@ -57,7 +57,8 @@ fun CreateOrderPage(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 140.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
                 // Заголовок экрана
@@ -70,11 +71,15 @@ fun CreateOrderPage(navController: NavController) {
                 )
 
                 // Поля ввода
-                InputFieldWithLabel("Тип заказа", orderType) { orderType = it }
-                InputFieldWithLabel("Вес заказа", orderWeight) { orderWeight = it }
+                InputFieldWithLabel("Тип заказа (например: Мебель)", orderType) { orderType = it }
+                InputFieldWithLabel("Вес заказа (кг)", orderWeight) { orderWeight = it }
                 InputFieldWithLabel("Место назначения", destination) { destination = it }
-                InputFieldWithLabel("Дата доставки", deliveryDate) { deliveryDate = it }
+                InputFieldWithLabel("Дата доставки (ГГГГ-ММ-ДД)", deliveryDate) { deliveryDate = it }
                 InputFieldWithLabel("Комментарии", comments) { comments = it }
+            }
+
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
             // Кнопки внизу
@@ -89,8 +94,34 @@ fun CreateOrderPage(navController: NavController) {
                 // Кнопка создания заказа
                 Button(
                     onClick = { 
-                        // Логика создания будет тут
-                        navController.popBackStack() 
+                        if (orderType.isNotBlank() && orderWeight.isNotBlank() && destination.isNotBlank()) {
+                            isLoading = true
+                            coroutineScope.launch {
+                                try {
+                                    val weightDouble = orderWeight.toDoubleOrNull() ?: 0.0
+                                    // Добавляем время T12:00:00 для корректного парсинга на сервере
+                                    val fullIsoDate = "${deliveryDate}T12:00:00"
+                                    
+                                    val response = RetrofitClient.instance.createOrder(
+                                        "Bearer $token",
+                                        OrderRequest(orderType, weightDouble, destination, fullIsoDate, comments)
+                                    )
+                                    
+                                    if (response.isSuccessful) {
+                                        Toast.makeText(context, "Заказ создан", Toast.LENGTH_SHORT).show()
+                                        navController.popBackStack() 
+                                    } else {
+                                        Toast.makeText(context, "Ошибка создания заказа", Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isLoading = false
+                                }
+                            }
+                        } else {
+                            Toast.makeText(context, "Заполните основные поля", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth(0.8f)

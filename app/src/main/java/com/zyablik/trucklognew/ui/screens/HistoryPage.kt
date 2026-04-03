@@ -1,44 +1,18 @@
 package com.zyablik.trucklognew.ui.screens
 
-import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,26 +27,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.api.RetrofitClient
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
+import com.zyablik.trucklognew.utils.SessionManager
+import kotlinx.coroutines.launch
 
 /**
  * Экран с историей (бывший экран транспорта).
- * value - параметр, который используется поисковой строкой
- * searchHistory - история поисковых запросов
- * focusManager - управление фокусом для скрытия клавиатуры
- * keyboardController - управление клавиатурой
  */
 @Composable
 fun HistoryPage(navController: NavController) {
     var value by rememberSaveable { mutableStateOf("") }
     var isSearchFocused by remember { mutableStateOf(false) }
+    var searchHistoryList by remember { mutableStateOf<List<String>>(emptyList()) }
     val context = LocalContext.current
-    val searchHistory = remember { SearchHistory(context = context) }
+    val coroutineScope = rememberCoroutineScope()
+    val sessionManager = remember { SessionManager(context) }
+    val token = sessionManager.getAuthToken() ?: ""
 
     // Контроллер клавиатуры и фокус поля ввода
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+
+    // Загрузка истории поиска с сервера
+    LaunchedEffect(Unit) {
+        if (token.isNotEmpty()) {
+            try {
+                val response = RetrofitClient.instance.getSearchHistory("Bearer $token")
+                if (response.isSuccessful) {
+                    searchHistoryList = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                // Игнорируем ошибки для истории
+            }
+        }
+    }
 
     // Список имеющихся автомобилей
     val cars = listOf(
@@ -144,7 +134,16 @@ fun HistoryPage(navController: NavController) {
                             Button(
                                 onClick = {
                                     if (value.isNotBlank()) {
-                                        searchHistory.addQuery(value)
+                                        coroutineScope.launch {
+                                            try {
+                                                RetrofitClient.instance.saveSearchQuery("Bearer $token", value)
+                                                // Обновляем локальный список истории
+                                                val response = RetrofitClient.instance.getSearchHistory("Bearer $token")
+                                                if (response.isSuccessful) {
+                                                    searchHistoryList = response.body() ?: emptyList()
+                                                }
+                                            } catch (e: Exception) {}
+                                        }
                                     }
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
@@ -179,7 +178,7 @@ fun HistoryPage(navController: NavController) {
                         }
 
                         // История поиска
-                        if (isSearchFocused && searchHistory.getQueries().isNotEmpty()) {
+                        if (isSearchFocused && searchHistoryList.isNotEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -197,7 +196,7 @@ fun HistoryPage(navController: NavController) {
                                             .weight(1f)
                                             .fillMaxWidth()
                                     ) {
-                                        items(searchHistory.getQueries()) { query ->
+                                        items(searchHistoryList) { query ->
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -210,32 +209,8 @@ fun HistoryPage(navController: NavController) {
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(query, color = Color.Black)
-                                                IconButton(
-                                                    onClick = {
-                                                        searchHistory.removeQuery(query)
-                                                    },
-                                                    modifier = Modifier.padding(4.dp)
-                                                ) {
-                                                    Icon(
-                                                        Icons.Default.Clear,
-                                                        contentDescription = "Remove",
-                                                        tint = Color.Black
-                                                    )
-                                                }
                                             }
                                         }
-                                    }
-                                    Button(
-                                        onClick = { searchHistory.clear() },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = LightCyan
-                                        ),
-                                        shape = RoundedCornerShape(45.dp)
-                                    ) {
-                                        Text("Очистить историю", color = Color.Black)
                                     }
                                 }
                             }
@@ -299,51 +274,6 @@ fun HistoryPage(navController: NavController) {
  * status - статус машины (выполняет заказ, свободна, на ТО)
  */
 data class Cars(val name: String, val model: String, val status: String)
-
-data class SearchHistory(
-    private val queries: MutableList<String> = mutableListOf(),
-    private val maxSize: Int = 10,
-    private val context: Context
-) {
-    private val sharedPreferences = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
-
-    init {
-        // Загружаем сохраненную историю при создании
-        val savedHistory = sharedPreferences.getString("queries", "") ?: ""
-        if (savedHistory.isNotEmpty()) {
-            queries.addAll(savedHistory.split("|||"))
-        }
-    }
-
-    private fun saveToPreferences() {
-        // Сохраняем историю в SharedPreferences
-        sharedPreferences.edit()
-            .putString("queries", queries.joinToString("|||"))
-            .apply()
-    }
-
-    fun addQuery(query: String) {
-        if (query.isBlank()) return
-        queries.remove(query) // Remove if exists to avoid duplicates
-        if (queries.size >= maxSize) {
-            queries.removeAt(queries.size - 1) // Remove oldest query
-        }
-        queries.add(0, query) // Add new query at the beginning
-        saveToPreferences()
-    }
-
-    fun clear() {
-        queries.clear()
-        saveToPreferences()
-    }
-
-    fun removeQuery(query: String) {
-        queries.remove(query)
-        saveToPreferences()
-    }
-
-    fun getQueries(): List<String> = queries
-}
 
 @Preview
 @Composable

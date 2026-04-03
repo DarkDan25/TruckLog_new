@@ -1,56 +1,67 @@
 package com.zyablik.trucklognew.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.zyablik.trucklognew.api.OrderResponse
+import com.zyablik.trucklognew.api.RetrofitClient
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
+import com.zyablik.trucklognew.utils.SessionManager
+import kotlinx.coroutines.launch
 
 /**
- * Окно с заказами
- *
- * value - переменная для поисковой стркои (используется для сортировки заказов)
- * orders - список заказов (в будущем будет хранить либо все заказы, либо те, которые соответствуют запросу поиска)
- *
- * В Scaffold описана визуальная часть экрана.
- * Также имеется Button() с именем Назад, чтобы можно было вернуться в главное меню
+ * Окно с заказами.
  */
 @Composable
 fun OrdersPage(navController: NavController) {
-    var value by remember { mutableStateOf("") }
-    // Список заказов
-    val orders = listOf(
-        Order(1,"Done","Heavy","Someone"),
-        Order(1,"Done","Heavy","Someone")
-    )
+    var searchQuery by remember { mutableStateOf("") }
+    var orders by remember { mutableStateOf<List<OrderResponse>>(emptyList()) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val sessionManager = remember { SessionManager(context) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    val token = sessionManager.getAuthToken() ?: ""
+
+    // Загрузка заказов при открытии экрана
+    LaunchedEffect(Unit) {
+        if (token.isNotEmpty()) {
+            isLoading = true
+            try {
+                val response = RetrofitClient.instance.getOrders("Bearer $token")
+                if (response.isSuccessful) {
+                    orders = response.body() ?: emptyList()
+                } else {
+                    Toast.makeText(context, "Ошибка загрузки заказов", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Ошибка сети", Toast.LENGTH_SHORT).show()
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    val filteredOrders = if (searchQuery.isBlank()) orders else orders.filter {
+        it.type.contains(searchQuery, ignoreCase = true) || it.destination.contains(searchQuery, ignoreCase = true)
+    }
+
     // Окно с заказами
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
@@ -74,36 +85,47 @@ fun OrdersPage(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MidLightGrey),
-                        value = value,
-                        onValueChange = { value = it },
-                        label = { Text("Поиск", color = Color.Black) },
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Поиск по типу или месту", color = Color.Black) },
                         shape = RoundedCornerShape(45.dp),
                         textStyle = TextStyle(color = Color.Black),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MidLightGrey,
                             unfocusedContainerColor = MidLightGrey,
-                            focusedIndicatorColor = MidLightGrey,
-                            unfocusedIndicatorColor = MidLightGrey,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                             focusedLabelColor = Color.Black,
                             unfocusedLabelColor = Color.Black
                         )
                     )
                 }
-                // Отобраэение списка заказов
-                Box {
+
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+
+                // Отображение списка заказов
+                Box(Modifier.weight(1f)) {
                     LazyColumn(
                         Modifier.padding(10.dp,10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        items(orders){ order ->
+                        items(filteredOrders){ order ->
                             Box(Modifier.background(MidLightGrey)
                                 .fillMaxWidth()
-                                .padding(10.dp,10.dp)){
+                                .padding(10.dp,10.dp)
+                                .clip(RoundedCornerShape(8.dp))){
                                 Column { 
-                                    Text(order.id.toString())
-                                    Text(order.status)
-                                    Text(order.type)
-                                    Text(order.driver)
+                                    Text("ID: ${order.id}", color = Color.Black)
+                                    Text("Тип: ${order.type}", color = Color.Black)
+                                    Text("Вес: ${order.weight} кг", color = Color.Black)
+                                    Text("Куда: ${order.destination}", color = Color.Black)
+                                    Text("Дата: ${order.deliveryDate}", color = Color.Black)
+                                    Text("Статус: ${order.status}", color = Color.Black)
+                                    if (order.comment != null) {
+                                        Text("Коммент: ${order.comment}", color = Color.Black)
+                                    }
                                 }
                             }
                         }
@@ -122,17 +144,19 @@ fun OrdersPage(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Кнопка создания нового заказа
-                    Button(
-                        onClick = { navController.navigate("create_order") },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LightCyan
-                        )
-                    ) {
-                        Text(
-                            "Новый заказ",
-                            color = Color.Black
-                        )
+                    // Кнопка создания нового заказа (только для клиентов)
+                    if (sessionManager.getUserRole() == "customer") {
+                        Button(
+                            onClick = { navController.navigate("create_order") },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = LightCyan
+                            )
+                        ) {
+                            Text(
+                                "Новый заказ",
+                                color = Color.Black
+                            )
+                        }
                     }
                     // Возврат в главное меню
                     Button(
@@ -152,8 +176,6 @@ fun OrdersPage(navController: NavController) {
         }
     }
 }
-data class Order(val id:Int, val status:String, val type:String, val driver:String)
-
 @Preview
 
 @Composable

@@ -27,15 +27,20 @@ import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.WarRed
 
+import androidx.compose.ui.platform.LocalContext
+import com.zyablik.trucklognew.utils.SessionManager
+
 /**
- * Экран профиля пользователя
- *
- * На нем отображается фото профиля, ФИО пользователя, его уникальный номер (ID).
- * Также имеется кнопка выхода из профиля (Button() с именем Выйти) и кнопка возврата в главное меню (Button() с именем Назад)
+ * Экран профиля пользователя.
  */
 @Composable
 fun ProfilePage(navController: NavController, navController1: NavController) {
-    // Экран профиля пользователя (отличается в зависимости от роли)
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val userName = sessionManager.getUserName() ?: "Пользователь"
+    val userRole = sessionManager.getUserRole() ?: "Неизвестно"
+
+    // Экран профиля пользователя
     Scaffold { innerpadding ->
         Box(Modifier.padding(innerpadding)) {
             Column {
@@ -46,12 +51,12 @@ fun ProfilePage(navController: NavController, navController1: NavController) {
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = "s",
+                        contentDescription = "avatar",
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 Box(Modifier.fillMaxSize()) {
-                    // Информация о пользователе (кол-во информации будет зависеть от роли пользователя
+                    // Информация о пользователе
                     Column(
                         Modifier
                             .align(Alignment.TopCenter)
@@ -59,13 +64,15 @@ fun ProfilePage(navController: NavController, navController1: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Фамилия ИО",
+                            userName,
                             fontSize = 30.sp,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
                         )
                         Text(
-                            "ID: <номер>",
-                            fontSize = 30.sp
+                            "Роль: $userRole",
+                            fontSize = 20.sp,
+                            color = Color.Gray
                         )
                     }
                     Column(
@@ -83,10 +90,9 @@ fun ProfilePage(navController: NavController, navController1: NavController) {
                             // Выход из аккаунта
                             Button(
                                 onClick = {
+                                    sessionManager.clearSession()
                                     navController.navigate("login") {
-                                        popUpTo("login") {
-                                            inclusive = true
-                                        }
+                                        popUpTo(0) { inclusive = true }
                                     }
                                 },
                                 Modifier.align(Alignment.BottomCenter),
@@ -109,11 +115,7 @@ fun ProfilePage(navController: NavController, navController1: NavController) {
                             // Возврат в главное меню
                             Button(
                                 onClick = {
-                                    navController1.navigate("home") {
-                                        popUpTo("home") {
-                                            inclusive = true
-                                        }
-                                    }
+                                    navController1.navigate("home")
                                 },
                                 Modifier.align(Alignment.BottomCenter),
                                 colors = ButtonDefaults.buttonColors(

@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "TruckLog(new)"
 include(":app")
+include(":server")
  
