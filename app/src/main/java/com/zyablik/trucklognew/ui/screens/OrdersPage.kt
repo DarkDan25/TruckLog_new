@@ -113,22 +113,39 @@ fun OrdersPage(navController: NavController) {
             Box(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .height(60.dp)
+                    .height(120.dp)
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp)
             ) {
-                // Возврат в главное меню
-                Button(
-                    onClick = { navController.navigate("home") },
-                    Modifier.align(Alignment.BottomCenter),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = LightCyan
-                    )
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        "Назад",
-                        color = Color.Black
-                    )
+                    // Кнопка создания нового заказа
+                    Button(
+                        onClick = { navController.navigate("create_order") },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LightCyan
+                        )
+                    ) {
+                        Text(
+                            "Новый заказ",
+                            color = Color.Black
+                        )
+                    }
+                    // Возврат в главное меню
+                    Button(
+                        onClick = { navController.navigate("home") },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LightCyan
+                        )
+                    ) {
+                        Text(
+                            "Назад",
+                            color = Color.Black
+                        )
+                    }
                 }
             }
 

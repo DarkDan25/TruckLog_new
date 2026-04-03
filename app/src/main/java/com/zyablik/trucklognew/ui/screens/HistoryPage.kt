@@ -51,44 +51,24 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.zyablik.trucklognew.api.AnimeQuote
-import com.zyablik.trucklognew.api.RetrofitClient
 import com.zyablik.trucklognew.ui.theme.LightCyan
 import com.zyablik.trucklognew.ui.theme.MidLightGrey
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
- * Экран со списком машин агрегатора.
+ * Экран с историей (бывший экран транспорта).
  * value - параметр, который используется поисковой строкой
- * quotesList - список найденых по запросу цитат (использовалось для практической работы по разработке мобильных приложений)
- * errorMessage - сообщение при возникновении ошибки
- * coroutineScope - запуск корутины для работы поиска
- * keyboardController - управление клавиаутрой, чтобы скрывать её, если требуется
- * focusManager - фокусировка на объекте (который использует пользователь. В данном случае это поисковая строка
- * cars - список автомобилей (это будет использовано чутка позже
- *
- * Функция findQuote ищет квоты по введеном запросу в поле поиска с использованием API
- * В Scaffold описан внешний вид страницы
- * Также в Box, где выводится результат поиска настроено поведение при успешном поиске, ошибке или при выполнении поиска (но результата еще нет)
+ * searchHistory - история поисковых запросов
+ * focusManager - управление фокусом для скрытия клавиатуры
+ * keyboardController - управление клавиатурой
  */
 @Composable
-fun CarsPage(navController: NavController) {
-    var sliderPosition by remember { mutableStateOf(0f) }
+fun HistoryPage(navController: NavController) {
     var value by rememberSaveable { mutableStateOf("") }
     var isSearchFocused by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val searchHistory = remember { SearchHistory(context = context) }
-    var isLoading by remember { mutableStateOf(false) }
-    var lastSearchText by remember { mutableStateOf("") }
-    
-    // Лист с цитатами, сообщение об ошибке и корутина
-    val quotesList = remember { mutableStateListOf<AnimeQuote>() }
-    var errorMessage by rememberSaveable() { mutableStateOf<String?>(null) }
-    val coroutineScope = rememberCoroutineScope()
 
     // Контроллер клавиатуры и фокус поля ввода
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -100,64 +80,24 @@ fun CarsPage(navController: NavController) {
         Cars("Nitsubishi", "Lancer X", "In service")
     )
 
-    // Функция поиска цитаты с использованием API
-    fun findQuote() {
-        if (value.isBlank()) return
-        if (value == lastSearchText) return
-        lastSearchText = value
-        searchHistory.addQuery(value)
-        isLoading = true
-        
-        coroutineScope.launch {
-            try {
-                errorMessage = null
-                val newQuotes = RetrofitClient.instance.getQuotesByAnime(value)
-                quotesList.clear()
-                quotesList.addAll(newQuotes)
-                if (newQuotes.isEmpty()) {
-                    errorMessage = "Цитаты не найдены для \"$value\""
-                    Log.d("rrr", errorMessage.toString())
-                }
-            } catch (e: Exception) {
-                quotesList.clear()
-                errorMessage = "Please, try again"
-            } finally {
-                isLoading = false
-            }
+    // Фильтрация списка машин по поисковому запросу
+    val filteredCars = if (value.isBlank()) {
+        cars
+    } else {
+        cars.filter {
+            it.name.contains(value, ignoreCase = true) ||
+            it.model.contains(value, ignoreCase = true) ||
+            it.status.contains(value, ignoreCase = true)
         }
     }
 
-    // Эффект для задержки поиска
-    LaunchedEffect(value) {
-        delay(2000)
-        if (value.isNotBlank()) {
-            findQuote()
-        }
-    }
-
-    // Экран с поиском
+    // Экран с историей
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
             Modifier
                 .padding(innerpadding)
                 .fillMaxSize()
         ) {
-            // Индикатор загрузки
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f))
-                        .zIndex(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(50.dp),
-                        color = LightCyan
-                    )
-                }
-            }
-
             Column(
                 Modifier
                     .align(Alignment.TopStart)
@@ -202,8 +142,10 @@ fun CarsPage(navController: NavController) {
                             )
                             // Кнопка поиска
                             Button(
-                                onClick = { 
-                                    findQuote()
+                                onClick = {
+                                    if (value.isNotBlank()) {
+                                        searchHistory.addQuery(value)
+                                    }
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
                                 },
@@ -235,7 +177,7 @@ fun CarsPage(navController: NavController) {
                                 Text("Очистить", fontSize = 12.sp, color = Color.Black)
                             }
                         }
-                        
+
                         // История поиска
                         if (isSearchFocused && searchHistory.getQueries().isNotEmpty()) {
                             Box(
@@ -269,7 +211,7 @@ fun CarsPage(navController: NavController) {
                                             ) {
                                                 Text(query, color = Color.Black)
                                                 IconButton(
-                                                    onClick = { 
+                                                    onClick = {
                                                         searchHistory.removeQuery(query)
                                                     },
                                                     modifier = Modifier.padding(4.dp)
@@ -301,61 +243,24 @@ fun CarsPage(navController: NavController) {
                     }
                 }
 
-                // Поле отображения результатов поиска в зависимости от результата поиска
-                Box {
-                    // Ошибка при поиске
-                    if (errorMessage != null) {
+                // Поле отображения результатов (автомобилей)
+                LazyColumn(
+                    Modifier
+                        .padding(10.dp, 10.dp)
+                        .fillMaxHeight()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(filteredCars) { car ->
                         Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(16.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MidLightGrey)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(16.dp)
-                            ) {
-                                Text(
-                                    errorMessage!!,
-                                    modifier = Modifier.padding(bottom = 16.dp),
-                                    color = Color.Black
-                                )
-                                Button(
-                                    onClick = { findQuote() },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = LightCyan
-                                    ),
-                                    shape = RoundedCornerShape(45.dp)
-                                ) {
-                                    Text(
-                                        "Попробовать снова",
-                                        color = Color.Black
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        LazyColumn(
                             Modifier
+                                .background(MidLightGrey)
+                                .fillMaxWidth()
                                 .padding(10.dp, 10.dp)
-                                .fillMaxHeight()
-                                .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            items(quotesList) { quotes ->
-                                Box(
-                                    Modifier
-                                        .background(MidLightGrey)
-                                        .fillMaxWidth()
-                                        .padding(10.dp, 10.dp)
-                                ) {
-                                    Column {
-                                        Text(quotes.show, color = Color.Black)
-                                        Text(quotes.character, color = Color.Black)
-                                        Text(quotes.quote, color = Color.Black)
-                                    }
-                                }
+                            Column {
+                                Text("${car.name} ${car.model}", color = Color.Black)
+                                Text("Status: ${car.status}", color = Color.Black)
                             }
                         }
                     }
@@ -443,5 +348,5 @@ data class SearchHistory(
 @Preview
 @Composable
 fun Preview8() {
-    CarsPage(navController = rememberNavController())
+    HistoryPage(navController = rememberNavController())
 }

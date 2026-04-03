@@ -35,7 +35,7 @@ fun MainMenuPage(navController: NavController) {
     val listButt = listOf(
         mainButtons("Профиль", "profile"),
         mainButtons("Заказы", "orders"),
-        mainButtons("Транспорт", "cars"),
+        mainButtons("История", "history"),
         mainButtons("Настройки", "settings")
     )
     Scaffold { innerpadding ->

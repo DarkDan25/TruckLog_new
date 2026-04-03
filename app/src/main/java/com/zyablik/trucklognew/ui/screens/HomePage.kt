@@ -88,8 +88,11 @@ fun Navigation2(navController: NavController){
             composable("orders") {
                 OrdersPage(navController1)
             }
-            composable("cars") {
-                CarsPage(navController1)
+            composable("create_order") {
+                CreateOrderPage(navController1)
+            }
+            composable("history") {
+                HistoryPage(navController1)
             }
             composable("home") {
                 MainMenuPage(navController1)
