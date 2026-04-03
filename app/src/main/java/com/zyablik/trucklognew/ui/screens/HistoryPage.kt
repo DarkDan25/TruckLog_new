@@ -64,23 +64,6 @@ fun HistoryPage(navController: NavController) {
         }
     }
 
-    // Список имеющихся автомобилей
-    val cars = listOf(
-        Cars("Honda", "Civic", "Free"),
-        Cars("Nitsubishi", "Lancer X", "In service")
-    )
-
-    // Фильтрация списка машин по поисковому запросу
-    val filteredCars = if (value.isBlank()) {
-        cars
-    } else {
-        cars.filter {
-            it.name.contains(value, ignoreCase = true) ||
-            it.model.contains(value, ignoreCase = true) ||
-            it.status.contains(value, ignoreCase = true)
-        }
-    }
-
     // Экран с историей
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
@@ -218,7 +201,7 @@ fun HistoryPage(navController: NavController) {
                     }
                 }
 
-                // Поле отображения результатов (автомобилей)
+                // Поле отображения истории поиска (вместо машин)
                 LazyColumn(
                     Modifier
                         .padding(10.dp, 10.dp)
@@ -226,17 +209,19 @@ fun HistoryPage(navController: NavController) {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(filteredCars) { car ->
+                    val filteredHistory = if (value.isBlank()) {
+                        searchHistoryList
+                    } else {
+                        searchHistoryList.filter { it.contains(value, ignoreCase = true) }
+                    }
+                    items(filteredHistory) { query ->
                         Box(
                             Modifier
                                 .background(MidLightGrey)
                                 .fillMaxWidth()
                                 .padding(10.dp, 10.dp)
                         ) {
-                            Column {
-                                Text("${car.name} ${car.model}", color = Color.Black)
-                                Text("Status: ${car.status}", color = Color.Black)
-                            }
+                            Text(query, color = Color.Black)
                         }
                     }
                 }
@@ -266,14 +251,6 @@ fun HistoryPage(navController: NavController) {
         }
     }
 }
-
-/**
- * Класс автомобиля
- * name - марка машины
- * model - модель
- * status - статус машины (выполняет заказ, свободна, на ТО)
- */
-data class Cars(val name: String, val model: String, val status: String)
 
 @Preview
 @Composable

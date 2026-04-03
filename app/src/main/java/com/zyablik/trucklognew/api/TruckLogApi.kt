@@ -43,6 +43,15 @@ interface TruckLogApiService {
     @GET("orders")
     suspend fun getOrders(@Header("Authorization") token: String): Response<List<OrderResponse>>
 
+    @POST("orders/{id}/accept")
+    suspend fun acceptOrder(@Header("Authorization") token: String, @Path("id") id: Int): Response<Unit>
+
+    @POST("orders/{id}/status")
+    suspend fun updateOrderStatus(@Header("Authorization") token: String, @Path("id") id: Int, @Query("status") status: String): Response<Unit>
+
+    @POST("orders/{id}/cancel")
+    suspend fun cancelOrder(@Header("Authorization") token: String, @Path("id") id: Int): Response<Unit>
+
     @POST("search-history")
     suspend fun saveSearchQuery(@Header("Authorization") token: String, @Body query: String): Response<Unit>
 
@@ -51,7 +60,7 @@ interface TruckLogApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/" // IP for Android Emulator
+    private const val BASE_URL = "http://192.168.1.78:8080/" // IP for Android Emulator
 
     val instance: TruckLogApiService by lazy {
         Retrofit.Builder()

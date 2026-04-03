@@ -19,7 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TruckLog(new)"
+rootProject.name = "TruckLognew"
 include(":app")
 include(":server")
- 

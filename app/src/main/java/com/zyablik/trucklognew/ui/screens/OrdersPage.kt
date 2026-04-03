@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.zyablik.trucklognew.api.OrderResponse
@@ -38,29 +39,40 @@ fun OrdersPage(navController: NavController) {
     var isLoading by remember { mutableStateOf(false) }
 
     val token = sessionManager.getAuthToken() ?: ""
+    val userRole = sessionManager.getUserRole() ?: ""
+
+    // Функция загрузки заказов
+    val refreshOrders = {
+        if (token.isNotEmpty()) {
+            isLoading = true
+            coroutineScope.launch {
+                try {
+                    val response = RetrofitClient.instance.getOrders("Bearer $token")
+                    if (response.isSuccessful) {
+                        orders = response.body() ?: emptyList()
+                    } else {
+                        Toast.makeText(context, "Ошибка загрузки заказов", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Ошибка сети", Toast.LENGTH_SHORT).show()
+                } finally {
+                    isLoading = false
+                }
+            }
+        }
+    }
 
     // Загрузка заказов при открытии экрана
     LaunchedEffect(Unit) {
-        if (token.isNotEmpty()) {
-            isLoading = true
-            try {
-                val response = RetrofitClient.instance.getOrders("Bearer $token")
-                if (response.isSuccessful) {
-                    orders = response.body() ?: emptyList()
-                } else {
-                    Toast.makeText(context, "Ошибка загрузки заказов", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(context, "Ошибка сети", Toast.LENGTH_SHORT).show()
-            } finally {
-                isLoading = false
-            }
-        }
+        refreshOrders()
     }
 
     val filteredOrders = if (searchQuery.isBlank()) orders else orders.filter {
         it.type.contains(searchQuery, ignoreCase = true) || it.destination.contains(searchQuery, ignoreCase = true)
     }
+
+    // Список статусов для прокрутки (для водителя)
+    val statusCycle = listOf("Accepted", "In Transit", "Delivered")
 
     // Окно с заказами
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
@@ -126,6 +138,81 @@ fun OrdersPage(navController: NavController) {
                                     if (order.comment != null) {
                                         Text("Коммент: ${order.comment}", color = Color.Black)
                                     }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Кнопки управления заказом
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        // Кнопка "Принять" (только для водителя и если статус Pending)
+                                        if (userRole == "driver" && order.status.equals("Pending", ignoreCase = true)) {
+                                            Button(
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            val resp = RetrofitClient.instance.acceptOrder("Bearer $token", order.id)
+                                                            if (resp.isSuccessful) {
+                                                                refreshOrders()
+                                                            }
+                                                        } catch (e: Exception) {}
+                                                    }
+                                                },
+                                                modifier = Modifier.height(36.dp),
+                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = LightCyan)
+                                            ) {
+                                                Text("Принять", color = Color.Black, fontSize = 12.sp)
+                                            }
+                                        }
+
+                                        // Кнопка "Изменить статус" (только для водителя и если он принял заказ)
+                                        if (userRole == "driver" && statusCycle.any { it.equals(order.status, ignoreCase = true) }) {
+                                            Button(
+                                                onClick = {
+                                                    val currentIndex = statusCycle.indexOfFirst { it.equals(order.status, ignoreCase = true) }
+                                                    val nextIndex = (currentIndex + 1) % statusCycle.size
+                                                    val nextStatus = statusCycle[nextIndex]
+                                                    
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            val resp = RetrofitClient.instance.updateOrderStatus("Bearer $token", order.id, nextStatus)
+                                                            if (resp.isSuccessful) {
+                                                                refreshOrders()
+                                                            }
+                                                        } catch (e: Exception) {}
+                                                    }
+                                                },
+                                                modifier = Modifier.height(36.dp),
+                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = LightCyan)
+                                            ) {
+                                                Text("Изменить статус", color = Color.Black, fontSize = 12.sp)
+                                            }
+                                        }
+
+                                        // Кнопка "Отменить заказ" (для всех, если не доставлен и не отменен)
+                                        if (!order.status.equals("Delivered", ignoreCase = true) && !order.status.equals("Cancelled", ignoreCase = true)) {
+                                            Button(
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            val resp = RetrofitClient.instance.cancelOrder("Bearer $token", order.id)
+                                                            if (resp.isSuccessful) {
+                                                                refreshOrders()
+                                                            }
+                                                        } catch (e: Exception) {}
+                                                    }
+                                                },
+                                                modifier = Modifier.height(36.dp),
+                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.7f))
+                                            ) {
+                                                Text("Отменить", color = Color.White, fontSize = 12.sp)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -145,7 +232,7 @@ fun OrdersPage(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Кнопка создания нового заказа (только для клиентов)
-                    if (sessionManager.getUserRole() == "customer") {
+                    if (userRole == "customer") {
                         Button(
                             onClick = { navController.navigate("create_order") },
                             colors = ButtonDefaults.buttonColors(

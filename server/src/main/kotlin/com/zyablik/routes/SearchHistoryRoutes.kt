@@ -2,6 +2,7 @@ package com.zyablik.routes
 
 import com.zyablik.database.DatabaseFactory.dbQuery
 import com.zyablik.models.SearchHistory
+import com.zyablik.models.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -9,6 +10,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
@@ -22,7 +24,7 @@ fun Route.searchHistoryRoutes() {
             
             dbQuery {
                 SearchHistory.insert {
-                    it[userId] = userId
+                    it[SearchHistory.userId] = EntityID(userId, Users)
                     it[query] = queryText
                 }
             }

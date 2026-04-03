@@ -46,9 +46,6 @@ import com.zyablik.trucklognew.ui.theme.ThemeState
  */
 @Composable
 fun SettingsPage(navController: NavController) {
-    var sliderPosition by remember { mutableStateOf(0f) }
-    var notificationsEnabled by remember { mutableStateOf(false) }
-
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->
         Box(
             Modifier
@@ -85,54 +82,6 @@ fun SettingsPage(navController: NavController) {
                                 uncheckedBorderColor = MidLightGrey,
                                 uncheckedTrackColor = MidLightGrey,
                                 checkedTrackColor = MidLightGrey
-                            )
-                        )
-                    }
-                }
-
-                // Настройка уведомлений
-                Box {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                    ) {
-                        Text("Уведомления", color = MaterialTheme.colorScheme.onBackground)
-                        Box(Modifier.width(5.dp))
-                        Switch(
-                            checked = notificationsEnabled,
-                            onCheckedChange = { notificationsEnabled = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = LightCyan,
-                                uncheckedThumbColor = LightCyan,
-                                checkedBorderColor = MidLightGrey,
-                                uncheckedBorderColor = MidLightGrey,
-                                uncheckedTrackColor = MidLightGrey,
-                                checkedTrackColor = MidLightGrey
-                            )
-                        )
-                    }
-                }
-
-                // Настройка звука приложения
-                Box {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                    ) {
-                        Text("Звук", color = MaterialTheme.colorScheme.onBackground)
-                        Box(Modifier.width(5.dp))
-                        Slider(
-                            value = sliderPosition,
-                            onValueChange = { sliderPosition = it },
-                            Modifier.fillMaxWidth(0.3f),
-                            colors = SliderDefaults.colors(
-                                thumbColor = LightCyan
                             )
                         )
                     }

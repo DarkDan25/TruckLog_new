@@ -7,6 +7,10 @@ plugins {
 group = "com.zyablik"
 version = "0.0.1"
 
+kotlin {
+    jvmToolchain(17)
+}
+
 application {
     mainClass.set("com.zyablik.ApplicationKt")
 }
@@ -25,6 +29,7 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.exposed.kotlin.datetime)
     implementation(libs.postgresql)
+    implementation(libs.hikaricp)
     
     implementation(libs.logback.classic)
 }

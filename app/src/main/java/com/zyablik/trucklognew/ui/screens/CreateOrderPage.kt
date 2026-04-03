@@ -109,7 +109,9 @@ fun CreateOrderPage(navController: NavController) {
                                     
                                     if (response.isSuccessful) {
                                         Toast.makeText(context, "Заказ создан", Toast.LENGTH_SHORT).show()
-                                        navController.popBackStack() 
+                                        navController.navigate("orders") {
+                                            popUpTo("home") // Remove create_order from backstack
+                                        }
                                     } else {
                                         Toast.makeText(context, "Ошибка создания заказа", Toast.LENGTH_SHORT).show()
                                     }
