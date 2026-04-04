@@ -25,9 +25,6 @@ import com.zyablik.trucklognew.ui.navigation.MainMenuPage
 import com.zyablik.trucklognew.R
 import com.zyablik.trucklognew.ui.theme.LightCyan
 
-/**
- * Экран главного меню с заголовком и главным меню
- */
 @Composable
 fun HomePage(navController: NavController){
     Scaffold(Modifier.fillMaxSize()) { innerpadding ->

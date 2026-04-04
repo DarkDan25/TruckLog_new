@@ -60,7 +60,7 @@ interface TruckLogApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.1.78:8080/" // IP for Android Emulator
+    private const val BASE_URL = "http://192.168.1.78:8080/"
 
     val instance: TruckLogApiService by lazy {
         Retrofit.Builder()

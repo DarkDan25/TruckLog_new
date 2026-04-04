@@ -25,9 +25,6 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 import com.zyablik.trucklognew.utils.SessionManager
 import kotlinx.coroutines.launch
 
-/**
- * Экран регистрации пользователя.
- */
 @Composable
 fun RegistrationPage(navController: NavController){
     // Значения для полей ввода

@@ -33,9 +33,6 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 import com.zyablik.trucklognew.utils.SessionManager
 import kotlinx.coroutines.launch
 
-/**
- * Окно с заказами.
- */
 @Composable
 fun OrdersPage(navController: NavController) {
     var searchQuery by rememberSaveable { mutableStateOf("") }

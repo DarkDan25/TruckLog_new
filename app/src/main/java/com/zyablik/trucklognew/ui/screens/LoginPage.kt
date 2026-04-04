@@ -24,9 +24,6 @@ import com.zyablik.trucklognew.ui.theme.MidLightGrey
 import com.zyablik.trucklognew.utils.SessionManager
 import kotlinx.coroutines.launch
 
-/**
- * Экран авторизации пользователя.
- */
 @Composable
 fun LoginPage(navController: NavController) {
     var phoneValue by remember { mutableStateOf("") }

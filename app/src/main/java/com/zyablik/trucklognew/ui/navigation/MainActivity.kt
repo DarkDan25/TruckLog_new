@@ -34,9 +34,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/**
- * Переключение между экранами приложения.
- */
 @Composable
 fun Navigation() {
     val context = LocalContext.current
